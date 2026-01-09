@@ -1,0 +1,4363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>CoBeing v1.1</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      height: 100vh;
+      max-height: 820px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* 上部バー（タブ＋メニュー） */
+    .top-bar {
+      background: rgba(15,23,42,0.96);
+      color: #e5e7eb;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(10px);
+    }
+
+    .top-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      flex: 1;
+    }
+
+    .nav-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 18px;
+      background: #374151;
+      color: #e5e7eb;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      min-height: 40px;
+    }
+
+    .nav-btn.active {
+      background: #6366f1;
+      color: #e5e7eb;
+      font-weight: 600;
+      box-shadow: 0 0 0 1px rgba(191,219,254,0.6);
+    }
+
+    .menu-toggle {
+      border: none;
+      background: transparent;
+      color: #e5e7eb;
+      font-size: 22px;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .menu-toggle:active { background: #374151; }
+
+    /* ステータスバー */
+    .status-bar {
+      font-size: 11px;
+      padding: 4px 10px 6px;
+      background: rgba(15,23,42,0.85);
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid rgba(148,163,184,0.4);
+    }
+
+    .status-label-main { font-weight: 600; }
+    .status-label-sub { opacity: 0.9; }
+    .status-spacer { flex: 1; }
+
+    /* ドロップダウンメニュー */
+    .dropdown-menu {
+      position: absolute;
+      top: 44px;
+      right: 8px;
+      background: #020617;
+      color: #e5e7eb;
+      border-radius: 10px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+      padding: 8px 0;
+      min-width: 230px;
+      display: none;
+      z-index: 10;
+    }
+    .dropdown-menu.open { display: block; }
+
+    .dropdown-divider {
+      height: 1px;
+      background: #4b5563;
+      margin: 4px 0;
+    }
+
+    .dropdown-item {
+      width: 100%;
+      padding: 8px 14px;
+      border: none;
+      background: transparent;
+      color: #e5e7eb;
+      text-align: left;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .dropdown-item:hover { background: #1f2937; }
+
+    .dropdown-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dropdown-check {
+      font-size: 14px;
+      opacity: 0.9;
+      min-width: 20px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 2px 0;
+    }
+    .dropdown-check:hover { background: #4b5563; }
+
+    /* チャット背景（時間帯） */
+    .chat-area {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      background: #f9fafb;
+      transition: background 0.8s ease;
+    }
+    .app.morning .chat-area {
+      background: linear-gradient(180deg, #fefce8 0%, #f9fafb 40%, #e0f2fe 100%);
+    }
+    .app.day .chat-area {
+      background: linear-gradient(180deg, #e0f2fe 0%, #f9fafb 50%, #f1f5f9 100%);
+    }
+    .app.evening .chat-area {
+      background: linear-gradient(180deg, #fed7aa 0%, #fecaca 40%, #f9fafb 100%);
+    }
+    .app.night .chat-area {
+      background: radial-gradient(circle at 10% 0%, #1e293b 0%, #020617 45%, #111827 100%);
+    }
+
+    .messages-wrapper { display: flex; flex-direction: column; }
+
+    /* 日付セパレーター */
+    .date-separator-wrapper {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0 6px;
+    }
+    .date-separator {
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.92);
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 10px rgba(15,23,42,0.35);
+      white-space: nowrap;
+      max-width: 95%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .date-separator-main { font-weight: 600; }
+    .date-separator-sub { opacity: 0.9; font-size: 10px; }
+
+    .timestamp {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+
+    /* 吹き出し */
+    .message {
+      max-width: 80%;
+      margin-bottom: 12px;
+      padding: 9px 13px;
+      border-radius: 20px;
+      font-size: 14px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      backdrop-filter: blur(4px);
+      position: relative;
+      overflow: hidden;
+    }
+    .message.bot {
+      background: radial-gradient(circle at 0% 0%, rgba(191,219,254,0.95), rgba(248,250,252,0.98));
+      border: 1px solid rgba(148,163,184,0.6);
+      align-self: flex-start;
+      box-shadow: 0 8px 18px rgba(15,23,42,0.25);
+    }
+    .message.user {
+      background: radial-gradient(circle at 100% 0%, #38bdf8, #6366f1);
+      color: #fff;
+      align-self: flex-end;
+      box-shadow: 0 8px 16px rgba(79,70,229,0.55);
+    }
+    .message img {
+      max-width: 180px;
+      border-radius: 10px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .message.bot::before,
+    .message.user::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      transform: translateY(-50%);
+      box-shadow: 0 0 12px rgba(255,255,255,0.9);
+      border: 1px solid rgba(15, 23, 42, 0.2);
+    }
+    .message.bot::before {
+      left: -6px;
+      background: radial-gradient(circle, #bfdbfe 0%, #e0f2fe 60%, transparent 100%);
+    }
+    .message.user::before {
+      right: -6px;
+      background: radial-gradient(circle, #c7d2fe 0%, #a5b4fc 60%, transparent 100%);
+    }
+
+    @keyframes bubblePulseLeft {
+      0% { transform: translateY(-50%) scale(1); opacity: 0.7; }
+      100% { transform: translateY(-50%) scale(1.8); opacity: 0; }
+    }
+    @keyframes bubblePulseRight {
+      0% { transform: translateY(-50%) scale(1); opacity: 0.7; }
+      100% { transform: translateY(-50%) scale(1.8); opacity: 0; }
+    }
+
+    .message.bot::after,
+    .message.user::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      transform: translateY(-50%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .message.bot::after {
+      left: -8px;
+      border: 1px solid rgba(191,219,254,0.8);
+      animation: bubblePulseLeft 2.4s ease-out infinite;
+    }
+    .message.user::after {
+      right: -8px;
+      border: 1px solid rgba(129,140,248,0.95);
+      animation: bubblePulseRight 2.4s ease-out infinite;
+    }
+
+    .app.night .message.bot::before,
+    .app.night .message.user::before {
+      box-shadow: 0 0 18px rgba(255, 255, 255, 1);
+    }
+    .app.night .message.bot::after,
+    .app.night .message.user::after {
+      animation-duration: 1.8s;
+    }
+
+    /* 入力欄のヒントバー */
+    .input-mood-hint {
+      font-size: 11px;
+      padding: 4px 10px 2px;
+      color: #6b7280;
+      background: #f3f4f6;
+      border-top: 1px solid rgba(148,163,184,0.25);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    /* 入力欄 */
+    .input-area {
+      padding: 8px;
+      border-top: none;
+      background: #f9fafb;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .icon-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 10px;
+      background: #e5e7eb;
+      font-size: 16px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .icon-btn:active { transform: translateY(1px); }
+
+    .input-area textarea {
+      flex: 1;
+      resize: none;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      padding: 8px 12px;
+      font-size: 14px;
+      max-height: 80px;
+      min-height: 36px;
+      outline: none;
+      transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      background: #ffffffaa;
+    }
+    .input-area textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px rgba(129,140,248,0.45);
+      background: #eef2ff;
+    }
+
+    .input-area.mood-tired textarea {
+      border-color: #f97316;
+      box-shadow: 0 0 0 1px rgba(248,113,113,0.35);
+      background: #fff7ed;
+    }
+    .input-area.mood-task textarea {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 1px rgba(59,130,246,0.35);
+      background: #eff6ff;
+    }
+    .input-area.mood-positive textarea {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px rgba(129,140,248,0.35);
+      background: #eef2ff;
+    }
+
+    .send-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      background: #6366f1;
+      color: #ffffff;
+      font-size: 14px;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(79,70,229,0.45);
+    }
+    .send-btn:active { transform: translateY(1px); }
+
+    .undo-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #f97316;
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .undo-btn:active { transform: translateY(1px); }
+
+    /* ==== AI設定パネル ==== */
+    .ai-settings-panel {
+      
+      display: none !important;
+position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: 56px;
+      background: rgba(15,23,42,0.98);
+      color: #e5e7eb;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+      padding: 10px 12px;
+      font-size: 13px;
+      display: none;
+      z-index: 20;
+    }
+    .ai-settings-panel.open { display: none !important;}
+
+    .ai-settings-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .ai-settings-close {
+      border: none;
+      background: transparent;
+      color: #e5e7eb;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 4px;
+      border-radius: 999px;
+    }
+    .ai-settings-close:hover { background:#1f2937; }
+
+    .ai-settings-current {
+      font-size: 12px;
+      margin-bottom: 6px;
+      opacity: 0.9;
+    }
+
+    .ai-settings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .ai-settings-item {
+      border-radius: 12px;
+      padding: 6px 8px;
+      background: #111827;
+      border: 1px solid #374151;
+      display: flex;
+      gap: 6px;
+      cursor: pointer;
+      align-items: flex-start;
+      width: 100%;
+      text-align: left;
+    }
+    .ai-settings-item.active {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px rgba(129,140,248,0.5);
+      background: linear-gradient(90deg,#1e293b,#111827);
+    }
+
+    .ai-settings-emoji {
+      font-size: 16px;
+      margin-top: 1px;
+    }
+    .ai-settings-text-main {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .ai-settings-text-sub {
+      font-size: 11px;
+      opacity: 0.9;
+    }
+
+    /* ==== プロフィール画面 ==== */
+    .profile-view {
+      flex: 1;
+      padding: 12px 14px 10px;
+      background: #f9fafb;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .app.profile-mode .chat-area,
+    .app.profile-mode .input-mood-hint,
+    .app.profile-mode .input-area {
+      display: none;
+    }
+
+    .app.profile-mode .profile-view {
+      display: flex;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .profile-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .profile-subtitle {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    .profile-close-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: #e5e7eb;
+      font-size: 13px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .profile-close-btn:active {
+      transform: translateY(1px);
+    }
+
+    .profile-section {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 10px 10px 8px;
+      box-shadow: 0 2px 6px rgba(15,23,42,0.06);
+      border: 1px solid #e5e7eb;
+      margin-bottom: 10px;
+    }
+
+    .profile-section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 6px;
+    }
+
+    .profile-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .profile-label {
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .profile-view input,
+    .profile-view select,
+    .profile-view textarea {
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      padding: 6px 8px;
+      font-size: 13px;
+      outline: none;
+      background: #f9fafb;
+    }
+
+    .profile-view input:focus,
+    .profile-view select:focus,
+    .profile-view textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px rgba(129,140,248,0.35);
+      background: #eef2ff;
+    }
+
+    .profile-view textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .profile-footer {
+      margin-top: 4px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .profile-save-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 11px;
+      background: #e5e7eb;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+        /* ==== 日記画面（Diary v0） ==== */
+    .diary-view {
+      flex: 1;
+      padding: 12px 14px 10px;
+      background: #f9fafb;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .app.diary-mode .chat-area,
+    .app.diary-mode .input-mood-hint,
+    .app.diary-mode .input-area {
+      display: none;
+    }
+
+    .app.diary-mode .profile-view { display: none; }
+    .app.diary-mode .diary-view { display: flex; }
+
+    .app.profile-mode .diary-view { display: none; }
+
+    .diary-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .diary-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .diary-subtitle {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 3px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .diary-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.92);
+      color: #e5e7eb;
+      box-shadow: 0 3px 10px rgba(15,23,42,0.18);
+    }
+
+    .diary-close-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #e5e7eb;
+      font-size: 13px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .diary-close-btn:active { transform: translateY(1px); }
+
+    .diary-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 10px 10px 10px;
+      box-shadow: 0 2px 6px rgba(15,23,42,0.06);
+      border: 1px solid #e5e7eb;
+      margin-bottom: 10px;
+    }
+
+    .diary-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .diary-card-sub {
+      font-size: 11px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    .diary-mood-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .diary-mood-btn {
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 0.05s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+    .diary-mood-btn:active { transform: translateY(1px); }
+    .diary-mood-btn.selected {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px rgba(129,140,248,0.35);
+      background: #eef2ff;
+    }
+
+    .diary-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .diary-label {
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .diary-view input,
+    .diary-view textarea {
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+      background: #f9fafb;
+    }
+
+    .diary-view input:focus,
+    .diary-view textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px rgba(129,140,248,0.35);
+      background: #eef2ff;
+    }
+
+    .diary-detail-toggle {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      background: #e5e7eb;
+      color: #111827;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .diary-detail-toggle:active { transform: translateY(1px); }
+
+    .diary-detail-box {
+      margin-top: 8px;
+      display: none;
+    }
+    .diary-detail-box.open { display: block; }
+
+    .diary-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .diary-save-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      background: #6366f1;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(79,70,229,0.25);
+    }
+    .diary-save-btn:active { transform: translateY(1px); }
+
+    .diary-save-btn[disabled] {
+      background: #e5e7eb;
+      color: #6b7280;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .diary-save-hint {
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .diary-history-item {
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      border-radius: 14px;
+      padding: 10px 10px;
+      margin-bottom: 8px;
+    }
+
+    .diary-history-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .diary-history-date {
+      font-size: 12px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .diary-history-mood {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .diary-history-line {
+      font-size: 12px;
+      color: #111827;
+      white-space: pre-wrap;
+    }
+
+    .diary-history-detail {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 6px;
+      white-space: pre-wrap;
+    }
+    
+
+  
+
+    /* ==== Onboarding ==== */
+    .onboard{
+      position:absolute; inset:0;
+      background: rgba(15,23,42,0.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:999;
+    }
+    .onboard-card{
+      width:min(560px, 100%);
+      background:#fff;
+      border-radius:16px;
+      padding:14px;
+      box-shadow: 0 14px 40px rgba(15,23,42,0.25);
+      border:1px solid #e5e7eb;
+    }
+    .onboard-head{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    .onboard-title{ font-weight:800; font-size:16px; color:#111827; }
+    .onboard-sub{ font-size:12px; color:#6b7280; margin-top:4px; }
+    .onboard-skip{
+      border:none; background:#e5e7eb; color:#111827;
+      border-radius:999px; padding:6px 10px; font-size:12px; cursor:pointer;
+    }
+    .onboard-label{ display:block; font-size:11px; color:#6b7280; margin:12px 0 6px; }
+    .onboard-input{
+      width:100%;
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      padding: 10px 10px;
+      font-size: 13px;
+      outline: none;
+      background: #f9fafb;
+    }
+    .onboard-input:focus{
+      border-color:#6366f1;
+      box-shadow:0 0 0 1px rgba(129,140,248,0.35);
+      background:#eef2ff;
+    }
+    .onboard-hint{ font-size:11px; color:#6b7280; margin-top:6px; }
+    .onboard-choices{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+    .onboard-choice{
+      border:1px solid #d1d5db;
+      background:#f9fafb;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      cursor:pointer;
+    }
+    .onboard-choice.selected{
+      border-color:#6366f1;
+      background:#eef2ff;
+      box-shadow:0 0 0 1px rgba(129,140,248,0.25);
+    }
+    .onboard-footer{
+      margin-top:14px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .onboard-progress{ font-size:11px; color:#6b7280; }
+    .onboard-nav{
+      border:none; background:#e5e7eb; color:#111827;
+      border-radius:999px; padding:10px 14px; font-size:13px; cursor:pointer;
+    }
+    .onboard-nav.primary{
+      background:#6366f1; color:#fff;
+      box-shadow:0 4px 10px rgba(79,70,229,0.25);
+    }
+
+    /* ==== カレンダー画面（Calendar v0） ==== */
+    .calendar-view{
+      flex:1;
+      padding: 12px 14px 10px;
+      background:#f9fafb;
+      display:none;
+      flex-direction:column;
+      overflow-y:auto;
+    }
+
+    .app.calendar-mode .chat-area,
+    .app.calendar-mode .input-mood-hint,
+    .app.calendar-mode .input-area{
+      display:none;
+    }
+    .app.calendar-mode .profile-view{ display:none; }
+    .app.calendar-mode .diary-view{ display:none; }
+    .app.calendar-mode .calendar-view{ display:flex; }
+
+    .cal-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .cal-title{
+      font-size:16px;
+      font-weight:800;
+      color:#111827;
+    }
+    .cal-sub{
+      font-size:11px;
+      color:#6b7280;
+      margin-top:3px;
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .cal-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:11px;
+      padding:4px 10px;
+      border-radius:999px;
+      background:#eef2ff;
+      border:1px solid #c7d2fe;
+      color:#111827;
+      white-space:nowrap;
+    }
+    .cal-close-btn{
+      border:none;
+      background:#e5e7eb;
+      color:#111827;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      cursor:pointer;
+    }
+
+    .cal-month-nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:10px;
+    }
+    .cal-month-label{
+      font-size:13px;
+      font-weight:700;
+      color:#111827;
+      text-align:center;
+      flex:1;
+    }
+    .cal-month-btn{
+      border:none;
+      background:#e5e7eb;
+      color:#111827;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      cursor:pointer;
+      flex-shrink:0;
+    }
+    .cal-grid{
+      background:#ffffff;
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      padding:10px;
+      box-shadow: 0 8px 18px rgba(15,23,42,0.06);
+    }
+    .cal-weekdays{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap:6px;
+      margin-bottom:6px;
+      font-size:10px;
+      color:#6b7280;
+      text-align:center;
+    }
+    .cal-days{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap:6px;
+    }
+    .cal-day{
+      border:1px solid #e5e7eb;
+      background:#f9fafb;
+      border-radius:12px;
+      padding:8px 6px;
+      min-height:52px;
+      cursor:pointer;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .cal-day:hover{ background:#f3f4f6; }
+    .cal-day.muted{
+      opacity:0.55;
+    }
+    .cal-day.selected{
+      border-color:#6366f1;
+      background:#eef2ff;
+      box-shadow: 0 0 0 1px rgba(129,140,248,0.30);
+    }
+    .cal-day-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+    }
+    .cal-day-num{
+      font-size:12px;
+      font-weight:700;
+      color:#111827;
+    }
+    .cal-day-mood{
+      font-size:12px;
+      opacity:0.9;
+    }
+    .cal-markers{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+      font-size:10px;
+      color:#6b7280;
+    }
+    .cal-dot{
+      width:6px;
+      height:6px;
+      border-radius:999px;
+      background:#111827;
+      opacity:0.55;
+      display:inline-block;
+    }
+    .cal-count{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      white-space:nowrap;
+    }
+
+    .cal-panel{
+      margin-top:12px;
+      background:#ffffff;
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      padding:12px;
+      box-shadow: 0 8px 18px rgba(15,23,42,0.06);
+    }
+    .cal-panel-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+    .cal-panel-title{
+      font-size:13px;
+      font-weight:800;
+      color:#111827;
+    }
+    .cal-panel-sub{
+      font-size:11px;
+      color:#6b7280;
+      margin-top:4px;
+    }
+    .cal-add-btn{
+      border:none;
+      background:#6366f1;
+      color:#fff;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      cursor:pointer;
+      box-shadow:0 4px 10px rgba(79,70,229,0.20);
+      flex-shrink:0;
+    }
+
+    .cal-section{
+      margin-top:10px;
+      border-top:1px solid #e5e7eb;
+      padding-top:10px;
+    }
+    .cal-section-title{
+      font-size:12px;
+      font-weight:800;
+      color:#111827;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .cal-empty{
+      font-size:12px;
+      color:#6b7280;
+      padding:8px 0;
+    }
+    .cal-event{
+      border:1px solid #e5e7eb;
+      background:#f9fafb;
+      border-radius:12px;
+      padding:10px;
+      margin-bottom:8px;
+    }
+    .cal-event-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .cal-event-title{
+      font-size:12px;
+      font-weight:700;
+      color:#111827;
+      white-space:pre-wrap;
+    }
+    .cal-event-meta{
+      font-size:11px;
+      color:#6b7280;
+      margin-top:4px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .cal-event-actions{
+      display:flex;
+      gap:6px;
+      flex-shrink:0;
+    }
+    .cal-mini-btn{
+      border:none;
+      background:#e5e7eb;
+      color:#111827;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:11px;
+      cursor:pointer;
+    }
+    .cal-mini-btn.danger{
+      background:#fee2e2;
+      color:#991b1b;
+    }
+
+    /* 予定追加シート */
+    .cal-sheet{
+      position:absolute;
+      inset:0;
+      background: rgba(15,23,42,0.55);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      padding:14px;
+      z-index:900;
+    }
+    .cal-sheet.open{ display:flex; }
+    .cal-sheet-card{
+      width:min(560px, 100%);
+      background:#ffffff;
+      border-radius:16px;
+      border:1px solid #e5e7eb;
+      box-shadow: 0 14px 40px rgba(15,23,42,0.25);
+      padding:12px;
+    }
+    .cal-sheet-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .cal-sheet-title{
+      font-size:14px;
+      font-weight:800;
+      color:#111827;
+    }
+    .cal-sheet-sub{
+      font-size:11px;
+      color:#6b7280;
+      margin-top:4px;
+    }
+    .cal-field{
+      margin-top:10px;
+    }
+    .cal-label{
+      display:block;
+      font-size:11px;
+      color:#6b7280;
+      margin-bottom:6px;
+    }
+    .cal-input{
+      width:100%;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      padding:10px 10px;
+      font-size:13px;
+      outline:none;
+      background:#f9fafb;
+    }
+    .cal-input:focus{
+      border-color:#6366f1;
+      box-shadow:0 0 0 1px rgba(129,140,248,0.35);
+      background:#eef2ff;
+    }
+    .cal-row{
+      display:flex;
+      gap:8px;
+    }
+    .cal-row > .cal-field{ flex:1; }
+    .cal-toggle{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-top:10px;
+      font-size:12px;
+      color:#111827;
+      background:#f9fafb;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:10px;
+    }
+    .cal-sheet-footer{
+      margin-top:12px;
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+    }
+    .cal-sheet-btn{
+      border:none;
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:13px;
+      cursor:pointer;
+      background:#e5e7eb;
+      color:#111827;
+    }
+    .cal-sheet-btn.primary{
+      background:#6366f1;
+      color:#fff;
+      box-shadow:0 4px 10px rgba(79,70,229,0.20);
+    }
+
+    /* ==== 返信中… UI（ドットアニメ） ==== */
+    .replying {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .replying .dots {
+      display: inline-flex;
+      gap: 3px;
+    }
+
+    .replying .dots span {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      border-radius: 999px;
+      background: currentColor;
+      opacity: 0.35;
+      animation: dotBounce 1.1s infinite ease-in-out;
+    }
+
+    .replying .dots span:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .replying .dots span:nth-child(3) {
+      animation-delay: 0.30s;
+    }
+
+    @keyframes dotBounce {
+      0%, 80%, 100% {
+        transform: translateY(0);
+        opacity: 0.35;
+      }
+      40% {
+        transform: translateY(-3px);
+        opacity: 0.95;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .replying .dots span {
+        animation: none;
+        opacity: 0.6;
+      }
+    }
+
+    /* ==== 返信中バブル（雲型） ==== */
+    .message[data-replying-bubble="true"] {
+      border-radius: 28px 28px 28px 5px;
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border: none;
+    }
+
+    .message[data-replying-bubble="true"]::before {
+      display: none;
+    }
+
+    .message[data-replying-bubble="true"]::after {
+      display: none;
+    }
+
+</style>
+</head>
+<body>
+  <!-- ===== CoBeing v2.0 Refactored Modules ===== -->
+  <script src="storage.js"></script>
+  <script src="helpers.js"></script>
+  <script src="api-payload.js"></script>
+  <script src="ui-message.js"></script>
+  <script src="ui-replying.js"></script>
+  <script src="modules.diary.js"></script>
+
+  <!-- モジュール読み込み完了確認 -->
+  <script>
+    // すべてのモジュールが定義されるまで待機
+    function waitForModules(callback, maxWait = 5000) {
+      const startTime = Date.now();
+      const checkModules = () => {
+        const allLoaded = typeof StorageModule !== 'undefined' &&
+                          typeof HelperModule !== 'undefined' &&
+                          typeof ApiPayloadModule !== 'undefined' &&
+                          typeof UIMessageModule !== 'undefined' &&
+                          typeof UIReplyingModule !== 'undefined' &&
+                          typeof DiaryModule !== 'undefined';
+        
+        if (allLoaded) {
+          callback();
+        } else if (Date.now() - startTime < maxWait) {
+          requestAnimationFrame(checkModules);
+        } else {
+          console.error('モジュール読み込みタイムアウト', {
+            StorageModule: typeof StorageModule,
+            HelperModule: typeof HelperModule,
+            ApiPayloadModule: typeof ApiPayloadModule,
+            UIMessageModule: typeof UIMessageModule,
+            UIReplyingModule: typeof UIReplyingModule,
+            DiaryModule: typeof DiaryModule,
+          });
+        }
+      };
+      checkModules();
+    }
+  </script>
+
+  <div class="app">
+    <div class="dropdown-menu" id="dropdownMenu">
+      <button class="dropdown-item tab-row" data-menu="chat">
+        <span class="dropdown-label">💬 チャット</span>
+        <span class="dropdown-check" data-check-for="chat">✔</span>
+      </button>
+      <button class="dropdown-item tab-row" data-menu="tasks">
+        <span class="dropdown-label">📋 今日のタスク</span>
+        <span class="dropdown-check" data-check-for="tasks">✔</span>
+      </button>
+      <button class="dropdown-item tab-row" data-menu="diary">
+        <span class="dropdown-label">✏ 日記</span>
+        <span class="dropdown-check" data-check-for="diary">✔</span>
+      </button>
+      <button class="dropdown-item tab-row" data-menu="schedule">
+        <span class="dropdown-label">📅 カレンダー</span>
+        <span class="dropdown-check" data-check-for="schedule">✔</span>
+      </button>
+      <button class="dropdown-item tab-row" data-menu="menu">
+        <span class="dropdown-label">🍚 献立</span>
+        <span class="dropdown-check" data-check-for="menu">✔</span>
+      </button>
+      <button class="dropdown-item tab-row" data-menu="money">
+        <span class="dropdown-label">💰 家計</span>
+        <span class="dropdown-check" data-check-for="money">✔</span>
+      </button>
+
+      <div class="dropdown-divider"></div>
+
+      <button class="dropdown-item" data-menu="profile">
+        <span class="dropdown-label">👤 プロフィール</span>
+      </button>
+      <button class="dropdown-item" data-menu="ai-settings" style="display:none;">
+        <span class="dropdown-label">🤖 AI設定</span>
+      </button>
+      <button class="dropdown-item" data-menu="settings">
+        <span class="dropdown-label">⚙ 各種設定</span>
+      </button>
+      <!-- ★ ここを追加 -->
+      <button class="dropdown-item" data-menu="reset">
+        <span class="dropdown-label">🧹 すべて初期化</span>
+      </button>
+      
+    </div>
+
+    <!-- 上部バー -->
+    <div class="top-bar">
+      <div class="top-nav" id="topNav"></div>
+      <button class="menu-toggle" id="menuToggle" aria-label="メニュー">☰</button>
+    </div>
+
+    <!-- ステータスバー -->
+    <div class="status-bar" id="statusBar">
+      <span class="status-label-main">🕊 CoBeing</span>
+      <span class="status-spacer"></span>
+      <span class="status-label-sub">---</span>
+    </div>
+
+    <!-- チャットエリア -->
+    <div class="chat-area">
+      <div class="messages-wrapper" id="messages"></div>
+    </div>
+
+    <!-- プロフィール画面：ユーザー側 ＋ AI側 -->
+    <div class="profile-view" id="profileView">
+      <div class="profile-header">
+        <div>
+          <div class="profile-title" id="profileTitle">あなた × 相棒 のプロフィール</div>
+          <div class="profile-subtitle">お互いのことを整理しておくメモ</div>
+        </div>
+        <button class="profile-close-btn" id="profileCloseBtn">✕</button>
+      </div>
+
+      <!-- 2カラムラッパ -->
+      <div class="profile-columns">
+        <!-- ▽ ユーザー側プロフィール -->
+        <div class="profile-column profile-column-user">
+          <!-- 基本情報 -->
+          <div class="profile-section">
+            <div class="profile-section-title">あなたの基本情報</div>
+
+            <div class="profile-field">
+              <label class="profile-label" for="profileNickname">呼び名（ニックネーム）</label>
+              <!-- ★ 既存ロジックとつながっているので id はそのまま -->
+              <input id="profileNickname" type="text" placeholder="例：ゆう" />
+            </div>
+
+            <div class="profile-field">
+              <label class="profile-label" for="profileAge">年齢（任意）</label>
+              <input id="profileAge" type="text" placeholder="例：21歳 / 大体これくらい など" />
+            </div>
+
+            <div class="profile-field">
+              <label class="profile-label" for="profileGender">性別（任意）</label>
+              <input id="profileGender" type="text" placeholder="書きやすい形で OK" />
+            </div>
+
+            <div class="profile-field">
+              <label class="profile-label" for="profileLifeRhythm">
+                立場・生活リズム
+              </label>
+              <!-- ★ これも既存 JS と互換のため id はそのまま -->
+              <select id="profileLifeRhythm">
+                <option value="">選択してください</option>
+                <option value="student">学生</option>
+                <option value="worker">社会人</option>
+                <option value="freelance">フリーランス</option>
+                <option value="other">その他</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 内面寄り情報 -->
+          <div class="profile-section">
+            <div class="profile-section-title">あなたの内面メモ</div>
+
+            <div class="profile-field">
+              <label class="profile-label" for="profileHobbies">趣味・よく話すテーマ</label>
+              <textarea id="profileHobbies" rows="2"
+                placeholder="ギター、アニメ、プログラミング…など"></textarea>
+            </div>
+
+            <div class="profile-field">
+              <label class="profile-label" for="profileValues">
+                大事にしたいこと・価値観
+              </label>
+              <!-- ★ 既存ロジックとつながっているので id はそのまま -->
+              <textarea id="profileValues" rows="3"
+                placeholder="大事にしたいこと、好きなこと、苦手なことなど"></textarea>
+            </div>
+
+            <div class="profile-field">
+              <label class="profile-label" for="profileDislikes">苦手なこと・避けたいこと</label>
+              <textarea id="profileDislikes" rows="2"
+                placeholder="あまり言われたくない言い方、避けたい話題など"></textarea>
+            </div>
+
+            <div class="profile-field">
+              <label class="profile-label" for="profileFreeText">自由メモ</label>
+              <textarea id="profileFreeText" rows="2"
+                placeholder="とりあえず今思っていることをメモしておく場所"></textarea>
+            </div>
+
+            <div class="profile-field" style="display:none;">
+              <label class="profile-label" for="profileRequests">
+                相棒へのお願いごと
+              </label>
+              <!-- ★ 既存ロジックとつながっているので id はそのまま -->
+              <textarea id="profileRequests" rows="3"
+                placeholder="こう話してほしい・こういうときはそっとしてほしい、など"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ▽ AI側プロフィール -->
+        <div class="profile-column profile-column-ai">
+          <div class="profile-section">
+            <div class="profile-section-title" id="aiProfileSectionTitle">相棒のプロフィール</div>
+
+            <div class="profile-field">
+              <label class="profile-label" for="aiRole">相棒の立場</label>
+              <select id="aiRole">
+                <option value="">選択してください</option>
+                <option value="friend">友達</option>
+                <option value="partner">相棒</option>
+                <option value="advisor">アドバイザー</option>
+                <option value="teacher">先生</option>
+                <option value="lover">恋人っぽい存在</option>
+                <option value="custom">カスタム（自由入力メモに書く）</option>
+              </select>
+            </div>
+
+            
+            <div class="profile-field">
+              <label class="profile-label" for="aiName">相棒の名前</label>
+              <input id="aiName" type="text" placeholder="例：しずく / ルナ / りん" />
+            </div>
+
+<div class="profile-field">
+              <label class="profile-label" for="aiMood">相棒の雰囲気</label>
+              <select id="aiMood">
+                <option value="">選択してください</option>
+                <option value="soft">優しめ</option>
+                <option value="energetic">元気</option>
+                <option value="calm">静か</option>
+                <option value="mysterious">不思議</option>
+                <option value="auto">おまかせ</option>
+              </select>
+            </div>
+
+            <div class="profile-field">
+              <span class="profile-label">相棒の基本モード（ペルソナ）</span>
+              <!-- 既存 personaPreset と対応させる予定のセレクト -->
+              <select id="aiPersonaPreset">
+                <option value="gentle">🕊 やわらか（gentle）</option>
+                <option value="cheerful">🌈 ポジティブ（cheerful）</option>
+                <option value="coach">🔥 コーチ（coach）</option>
+                <option value="honest">💬 本音トーク（honest）</option>
+              </select>
+            </div>
+
+            <div class="profile-field">
+              <label class="profile-label" for="aiFreeText">
+                相棒の特徴メモ・話し方の希望
+              </label>
+              <textarea id="aiFreeText" rows="3"
+                placeholder="語尾のイメージ、NG 行動、距離感の希望など"></textarea>
+            </div>
+          </div>
+
+          <div class="profile-section">
+            <div class="profile-section-title">関係性メモ（おまけ）</div>
+
+            <div class="profile-field">
+              <label class="profile-label" for="relMemo" id="relMemoLabel">
+                あなたと相棒の関係についてメモしたいこと
+              </label>
+              <textarea id="relMemo" rows="3"
+                placeholder="一緒に乗り越えたこと、これから一緒にやりたいことなど"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-footer">
+        <!-- ★ ボタンの id はそのまま（既存 JS が使う） -->
+        <button class="profile-save-btn" id="profileSaveBtn" disabled>
+          v2：内容を編集したら「変更を保存」
+        </button>
+      </div>
+    </div>
+
+        <!-- 日記画面（Diary v0） -->
+    <div class="diary-view" id="diaryView">
+      <div class="diary-header">
+        <div>
+          <div class="diary-title">✏ 今日の日記</div>
+          <div class="diary-subtitle">
+            <span class="diary-pill" id="diaryDatePill">--/--（-）</span>
+            <span class="diary-pill" id="diaryDayPill">Day --</span>
+            <span class="diary-pill" id="diaryStreakPill">🔥 0</span>
+          </div>
+        </div>
+        <button class="diary-close-btn" id="diaryCloseBtn">✕</button>
+      </div>
+
+      <div class="diary-card">
+        <div class="diary-card-title">
+          <span>今日の入力（1分でOK）</span>
+          <span class="diary-card-sub" id="diarySavedHint">未保存</span>
+        </div>
+
+        <div class="diary-field">
+          <div class="diary-label">気分</div>
+          <div class="diary-mood-row" id="diaryMoodRow">
+            <button class="diary-mood-btn" data-mood="0" type="button" aria-label="とてもつらい">😢</button>
+            <button class="diary-mood-btn" data-mood="1" type="button" aria-label="つらい">😞</button>
+            <button class="diary-mood-btn" data-mood="2" type="button" aria-label="ふつう">😐</button>
+            <button class="diary-mood-btn" data-mood="3" type="button" aria-label="よい">🙂</button>
+            <button class="diary-mood-btn" data-mood="4" type="button" aria-label="とてもよい">😄</button>
+          </div>
+        </div>
+
+        <div class="diary-field">
+          <label class="diary-label" for="diaryLineInput">今日の一言（必須）</label>
+          <input id="diaryLineInput" type="text" maxlength="80" placeholder="例：授業しんどかったけど、最後まで行けた" />
+        </div>
+
+        <button class="diary-detail-toggle" id="diaryDetailToggle" type="button">
+          ➕ もう少し書く（任意）
+        </button>
+
+        <div class="diary-detail-box" id="diaryDetailBox">
+          <div class="diary-field" style="margin-bottom:0;">
+            <label class="diary-label" for="diaryDetailInput">詳細（任意）</label>
+            <textarea id="diaryDetailInput" rows="4" maxlength="800"
+              placeholder="よかったこと / しんどかったこと / 明日の自分へ など、好きに。"></textarea>
+          </div>
+        </div>
+
+        <div class="diary-footer">
+          <div class="diary-save-hint" id="diarySaveHint">気分＋一言で保存できるよ</div>
+          <button class="diary-save-btn" id="diarySaveBtn" disabled>保存</button>
+        </div>
+      </div>
+
+      <div class="diary-card">
+        <div class="diary-card-title">
+          <span>直近の記録（最大7日）</span>
+          <span class="diary-card-sub" id="diaryHistorySub">---</span>
+        </div>
+        <div id="diaryHistoryList"></div>
+      </div>
+    </div>
+
+
+    <!-- カレンダー画面（Calendar v0） -->
+    <div class="calendar-view" id="calendarView">
+      <div class="cal-header">
+        <div>
+          <div class="cal-title">📅 カレンダー</div>
+          <div class="cal-sub">
+            <span class="cal-pill" id="calTodayPill">今日：--/--（-）</span>
+            <span class="cal-pill" id="calSelectedPill">選択：--/--（-）</span>
+          </div>
+        </div>
+        <button class="cal-close-btn" id="calendarCloseBtn">✕</button>
+      </div>
+
+      <div class="cal-month-nav">
+        <button class="cal-month-btn" id="calPrevBtn" type="button">◀</button>
+        <div class="cal-month-label" id="calMonthLabel">----</div>
+        <button class="cal-month-btn" id="calNextBtn" type="button">▶</button>
+      </div>
+
+      <div class="cal-grid">
+        <div class="cal-weekdays">
+          <div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div>
+        </div>
+        <div class="cal-days" id="calDays"></div>
+      </div>
+
+      <div class="cal-panel" id="calPanel">
+        <div class="cal-panel-head">
+          <div>
+            <div class="cal-panel-title" id="calPanelTitle">--/--（-）</div>
+            <div class="cal-panel-sub" id="calPanelSub">---</div>
+          </div>
+          <button class="cal-add-btn" id="calAddBtn" type="button">＋ 予定</button>
+        </div>
+
+        <div class="cal-section">
+          <div class="cal-section-title">🗓 予定</div>
+          <div id="calEventsList"></div>
+        </div>
+
+        <div class="cal-section">
+          <div class="cal-section-title">✏ 日記</div>
+          <div id="calDiaryBox" class="cal-empty">---</div>
+        </div>
+
+        <div class="cal-section">
+          <div class="cal-section-title">💬 会話</div>
+          <div id="calChatBox" class="cal-empty">---</div>
+        </div>
+      </div>
+
+      <!-- 予定追加シート -->
+      <div class="cal-sheet" id="calSheet">
+        <div class="cal-sheet-card">
+          <div class="cal-sheet-head">
+            <div>
+              <div class="cal-sheet-title" id="calSheetTitle">予定を追加</div>
+              <div class="cal-sheet-sub" id="calSheetSub">---</div>
+            </div>
+            <button class="cal-mini-btn" id="calSheetCloseBtn" type="button">閉じる</button>
+          </div>
+
+          <div class="cal-field">
+            <label class="cal-label" for="calTitleInput">タイトル（必須）</label>
+            <input class="cal-input" id="calTitleInput" type="text" maxlength="60" placeholder="例：授業 / バイト / 友達とご飯" />
+          </div>
+
+          <div class="cal-row">
+            <div class="cal-field">
+              <label class="cal-label" for="calStartInput">開始（任意）</label>
+              <input class="cal-input" id="calStartInput" type="time" />
+            </div>
+            <div class="cal-field">
+              <label class="cal-label" for="calEndInput">終了（任意）</label>
+              <input class="cal-input" id="calEndInput" type="time" />
+            </div>
+          </div>
+
+          <div class="cal-field">
+            <label class="cal-label" for="calNoteInput">メモ（任意）</label>
+            <textarea class="cal-input" id="calNoteInput" rows="3" maxlength="200"
+              placeholder="場所 / 持ち物 / ひとこと など"></textarea>
+          </div>
+
+          <div class="cal-toggle">
+            <input id="calReflectToggle" type="checkbox" checked />
+            <label for="calReflectToggle">この予定をチャットで参照させる（おすすめ）</label>
+          </div>
+
+          <div class="cal-sheet-footer">
+            <button class="cal-sheet-btn" id="calSheetCancelBtn" type="button">キャンセル</button>
+            <button class="cal-sheet-btn primary" id="calSheetSaveBtn" type="button">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 入力欄ヒント -->
+    <div class="input-mood-hint" id="inputMoodHint">
+      今の気持ちや今日のこと、自由に書いてみてね。
+    </div>
+
+    <!-- 入力欄 -->
+    <div class="input-area" id="inputArea">
+      <button class="icon-btn" id="imageBtn" title="画像を選択">📷</button>
+      <input type="file" id="imageInput" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;" />
+
+
+      <button class="undo-btn" id="undoBtn" title="直前の送信を取り消す">取消</button>
+
+      <textarea id="input" rows="1" placeholder="相棒に話しかけてみよう"></textarea>
+      <button class="send-btn" id="sendBtn">送信</button>
+    </div>
+
+    <!-- 🔧 AI設定パネル -->
+    <div class="ai-settings-panel" id="aiSettingsPanel">
+      <div class="ai-settings-header">
+        <span id="aiSettingsTitle">相棒の性格設定</span>
+        <button class="ai-settings-close" id="aiSettingsClose">✕</button>
+      </div>
+      <div class="ai-settings-current">
+        現在のモード：<span id="aiSettingsCurrentLabel">🕊 やわらか</span>
+      </div>
+      <div class="ai-settings-list" id="aiSettingsList"></div>
+    </div>
+  </div>
+
+  <!-- ==== Onboarding（初期設定） ==== -->
+    <div class="onboard" id="onboard" style="display:none;">
+      <div class="onboard-card">
+        <div class="onboard-head">
+          <div>
+            <div class="onboard-title">はじめに</div>
+            <div class="onboard-sub">あなたに合う相棒を作ろう（あとでいつでも変更できるよ）</div>
+          </div>
+          <button class="onboard-skip" id="onboardSkipBtn" type="button" title="あとで設定">あとで</button>
+        </div>
+  
+        <!-- Step 1 -->
+        <div class="onboard-step" data-step="1">
+          <label class="onboard-label">あなたの名前（呼ばれたい名前）</label>
+          <input id="onbUserName" class="onboard-input" placeholder="例：ゆう / けんた / みお" maxlength="20" />
+          <div class="onboard-hint">※アプリ内の表示や、相棒が呼ぶ名前になるよ</div>
+        </div>
+  
+        <!-- Step 2 -->
+        <div class="onboard-step" data-step="2" style="display:none;">
+          <label class="onboard-label">このアプリのAIに求める存在は？</label>
+          <select id="onbAiRole" class="onboard-input">
+            <option value="partner">相棒</option>
+            <option value="friend">友達</option>
+            <option value="lover">恋人</option>
+            <option value="teacher">先生</option>
+            <option value="friend">聞き役</option>
+            <option value="advisor">コーチ</option>
+            <option value="custom">カスタム</option>
+          </select>
+          <div class="onboard-hint">※関係性の前提。口調や距離感の基準になるよ</div>
+        </div>
+  
+        <!-- Step 3 -->
+        <div class="onboard-step" data-step="3" style="display:none;">
+          <label class="onboard-label">AIの性格（雰囲気）は？</label>
+          <div class="onboard-choices" id="onbPersonaChoices">
+            <button type="button" class="onboard-choice" data-persona="gentle">やさしい / 静か</button>
+            <button type="button" class="onboard-choice" data-persona="cheerful">明るい / 元気</button>
+            <button type="button" class="onboard-choice" data-persona="coach">背中を押す</button>
+            <button type="button" class="onboard-choice" data-persona="honest">やさしい本音</button>
+          </div>
+          <div class="onboard-hint">※これは最初の設定。後でいつでも変えられる</div>
+        </div>
+  
+        <!-- Step 4 -->
+        <div class="onboard-step" data-step="4" style="display:none;">
+          <label class="onboard-label">その相手（AI）の名前は？</label>
+          <input id="onbAiName" class="onboard-input" placeholder="例：しずく / ルナ / りん" maxlength="20" />
+          <div class="onboard-hint" id="onbAiNameHint">※アプリ内のAI名がこの名前に置き換わっていく</div>
+        </div>
+  
+        <!-- Step 5 (optional) -->
+        <div class="onboard-step" data-step="5" style="display:none;">
+          <label class="onboard-label" id="onbAiFreeTextLabel">相棒へのお願い（任意）</label>
+          <textarea id="onbAiFreeText" class="onboard-input" rows="3" maxlength="200"
+            placeholder="例：否定しないでほしい / 静かに聞いてほしい / 無理させないで など"></textarea>
+          <div class="onboard-hint">※ここはあとでプロフィールから編集できる</div>
+        </div>
+  
+        <div class="onboard-footer">
+          <button class="onboard-nav" id="onboardBackBtn" type="button">戻る</button>
+          <div class="onboard-progress" id="onboardProgress">1 / 5</div>
+          <button class="onboard-nav primary" id="onboardNextBtn" type="button">次へ</button>
+        </div>
+      </div>
+    </div>
+
+
+  <script>
+    // DOM参照
+    const appEl = document.querySelector('.app');
+    const messagesEl = document.getElementById('messages');
+    const inputEl = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+    const undoBtn = document.getElementById('undoBtn');
+    const imageBtn = document.getElementById('imageBtn');
+    const imageInput = document.getElementById('imageInput');
+    const menuToggle = document.getElementById('menuToggle');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const topNav = document.getElementById('topNav');
+    const statusBarEl = document.getElementById('statusBar');
+    const inputMoodHintEl = document.getElementById('inputMoodHint');
+    const inputAreaEl = document.getElementById('inputArea');
+        // v2フォームのDOM参照（追加）
+    const profileAgeInput = document.getElementById('profileAge');
+    const profileGenderInput = document.getElementById('profileGender');
+    const profileHobbiesTextarea = document.getElementById('profileHobbies');
+    const profileDislikesTextarea = document.getElementById('profileDislikes');
+    const profileFreeTextTextarea = document.getElementById('profileFreeText');
+
+    const aiRoleSelect = document.getElementById('aiRole');
+    const aiNameInput = document.getElementById('aiName');
+    const aiMoodSelect = document.getElementById('aiMood');
+    const aiPersonaPresetSelect = document.getElementById('aiPersonaPreset');
+    const aiFreeTextTextarea = document.getElementById('aiFreeText');
+
+    const relMemoTextarea = document.getElementById('relMemo');
+
+    // ==== 日記（Diary v0）DOM参照 ====
+    const diaryView = document.getElementById('diaryView');
+    const diaryCloseBtn = document.getElementById('diaryCloseBtn');
+    const diaryDatePill = document.getElementById('diaryDatePill');
+    const diaryDayPill = document.getElementById('diaryDayPill');
+    const diaryStreakPill = document.getElementById('diaryStreakPill');
+    const diarySavedHint = document.getElementById('diarySavedHint');
+
+    const diaryMoodRow = document.getElementById('diaryMoodRow');
+    const diaryLineInput = document.getElementById('diaryLineInput');
+    const diaryDetailToggle = document.getElementById('diaryDetailToggle');
+    const diaryDetailBox = document.getElementById('diaryDetailBox');
+    const diaryDetailInput = document.getElementById('diaryDetailInput');
+    const diarySaveBtn = document.getElementById('diarySaveBtn');
+    const diarySaveHint = document.getElementById('diarySaveHint');
+
+    const diaryHistoryList = document.getElementById('diaryHistoryList');
+    const diaryHistorySub = document.getElementById('diaryHistorySub');
+
+    
+    // ==== カレンダー（Calendar v0）DOM参照 ====
+    const calendarView = document.getElementById('calendarView');
+    const calendarCloseBtn = document.getElementById('calendarCloseBtn');
+    const calTodayPill = document.getElementById('calTodayPill');
+    const calSelectedPill = document.getElementById('calSelectedPill');
+    const calPrevBtn = document.getElementById('calPrevBtn');
+    const calNextBtn = document.getElementById('calNextBtn');
+    const calMonthLabel = document.getElementById('calMonthLabel');
+    const calDaysEl = document.getElementById('calDays');
+    const calPanelTitle = document.getElementById('calPanelTitle');
+    const calPanelSub = document.getElementById('calPanelSub');
+    const calAddBtn = document.getElementById('calAddBtn');
+    const calEventsList = document.getElementById('calEventsList');
+    const calDiaryBox = document.getElementById('calDiaryBox');
+    const calChatBox = document.getElementById('calChatBox');
+
+    // Sheet
+    const calSheet = document.getElementById('calSheet');
+    const calSheetTitle = document.getElementById('calSheetTitle');
+    const calSheetSub = document.getElementById('calSheetSub');
+    const calSheetCloseBtn = document.getElementById('calSheetCloseBtn');
+    const calSheetCancelBtn = document.getElementById('calSheetCancelBtn');
+    const calSheetSaveBtn = document.getElementById('calSheetSaveBtn');
+
+    const calTitleInput = document.getElementById('calTitleInput');
+    const calStartInput = document.getElementById('calStartInput');
+    const calEndInput = document.getElementById('calEndInput');
+    const calNoteInput = document.getElementById('calNoteInput');
+    const calReflectToggle = document.getElementById('calReflectToggle');
+
+
+    // プロフィール画面
+    const profileView = document.getElementById('profileView');
+    const profileTitleEl = document.getElementById('profileTitle');
+    const profileCloseBtn = document.getElementById('profileCloseBtn');
+    const profileSaveBtn = document.getElementById('profileSaveBtn');
+    // プロフィール入力項目
+    const profileNicknameInput = document.getElementById('profileNickname');
+    const profileLifeRhythmSelect = document.getElementById('profileLifeRhythm');
+    const profileValuesTextarea = document.getElementById('profileValues');
+    const profileRequestsTextarea = document.getElementById('profileRequests');
+
+// プロフィール保存キー（v1 はレガシー、v2 が本体）
+const PROFILE_KEY_V1 = 'cobeing_profile_v1';
+const PROFILE_KEY_V2 = 'cobeing_profile_v2';
+
+    // AI設定パネル
+    const aiSettingsPanel = document.getElementById('aiSettingsPanel');
+    const aiSettingsClose = document.getElementById('aiSettingsClose');
+    const aiSettingsList = document.getElementById('aiSettingsList');
+    const aiSettingsCurrentLabel = document.getElementById('aiSettingsCurrentLabel');
+
+    // 会話データ
+    let conversation = [];
+    const CONVO_KEY = 'cobeing_conversation_v1';
+
+    // ★ 初期化でまとめて消すキー（必要に応じて増やしてOK）
+    const RESET_STORAGE_KEYS = [
+      CONVO_KEY,
+      'cobeing_profile_v1',         // プロフィール v1（レガシー）
+      'cobeing_profile_v2',         // プロフィール v2（本体）
+      'cobeing_enabled_tabs',       // タブ構成
+      'cobeing_first_date',         // Day N 用の初回日付
+      'cobeing_persona_preset_v1',  // AIのモード（PERSONA_KEY の中身を直書き）
+      'cobeing_diary_v1',           // ✅ 日記（Diary v0）
+
+    ];
+
+
+
+    // ★ すべて初期化してリロードする関数
+    function resetAllData() {
+      const ok = window.confirm(
+        'CoBeing のデータを全部初期化するよ。\n' +
+        '・会話ログ\n' +
+        '・プロフィール\n' +
+        '・タブ設定\n' +
+        '・タブ設定\n' +
+        '・日記\n' +
+        '・相棒のモード などが消えます。\n\n' +
+        '本当に続行してもいい？'
+      );
+      if (!ok) return;
+
+      try {
+        RESET_STORAGE_KEYS.forEach((key) => {
+          try {
+            localStorage.removeItem(key);
+          } catch (e) {
+            console.error('localStorage remove 失敗:', key, e);
+          }
+        });
+      } catch (e) {
+        console.error('初期化中のエラー:', e);
+      }
+
+      // まっさらな状態から起動し直す
+      window.location.reload();
+    }
+
+    // 直近のDOMノード（取消用）
+    let lastUserMessageNode = null;
+    let lastBotMessageNode = null;
+
+
+    // 画像関連
+    let pendingImageSrc = null;
+    let pendingImageBase64 = null;
+    // ✅ 画像の許可形式（OpenAI側が受けるものに合わせる）
+    const ALLOWED_IMAGE_MIME = new Set([
+      'image/png',
+      'image/jpeg',
+      'image/gif',
+      'image/webp',
+    ]);
+
+// （任意）サイズ制限：base64化で増えるので余裕を見て小さめ推奨
+const MAX_IMAGE_MB = 8;
+
+
+    // 日付セパレーター用
+    let lastMessageDateKey = null;
+
+    // タブ管理
+    const allTabs = [
+      { id: 'chat', icon: '💬', title: 'チャット' },
+      { id: 'tasks', icon: '📋', title: 'タスク' },
+      { id: 'diary', icon: '✏',  title: '日記' },
+      { id: 'schedule', icon: '📅', title: 'カレンダー' },
+      { id: 'menu', icon: '🍚', title: '献立' },
+      { id: 'money', icon: '💰', title: '家計' },
+    ];
+
+    // loadEnabledTabs, saveEnabledTabs は StorageModule を使用（遅延初期化）
+    let enabledTabs = null;
+    let activeTabId = 'chat';
+    
+    // StorageModule が定義された後に実行
+    function initializeEnabledTabs() {
+      if (!enabledTabs && typeof StorageModule !== 'undefined') {
+        enabledTabs = StorageModule.loadEnabledTabs();
+        activeTabId = enabledTabs.includes('chat') ? 'chat' : enabledTabs[0];
+      }
+    }
+
+    function renderTopNav() {
+      if (!enabledTabs) return; // enabledTabs が未初期化の場合はスキップ
+      topNav.innerHTML = '';
+      enabledTabs.forEach(id => {
+        const tab = allTabs.find(t => t.id === id);
+        if (!tab) return;
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn';
+        if (id === activeTabId) btn.classList.add('active');
+        btn.setAttribute('data-tab', id);
+        btn.title = tab.title;
+        btn.textContent = tab.icon;
+        btn.addEventListener('click', () => selectTab(id));
+        topNav.appendChild(btn);
+      });
+    }
+
+    function selectTab(tabId) {
+      activeTabId = tabId;
+
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-tab') === tabId);
+      });
+
+      // 画面モードを一旦リセット
+      appEl.classList.remove('profile-mode');
+      appEl.classList.remove('diary-mode');
+      appEl.classList.remove('calendar-mode');
+
+      // タブごとの表示
+      if (tabId === 'diary') {
+        openDiaryView();
+      } else if (tabId === 'schedule') {
+        openCalendarView();
+      }
+      // それ以外は今はチャット表示のまま（将来tasks/schedule等を追加）
+    }
+
+
+    function updateDropdownChecks() {
+      document.querySelectorAll('.dropdown-check').forEach(check => {
+        const id = check.getAttribute('data-check-for');
+        if (!id) return;
+        const isEnabled = enabledTabs.includes(id);
+        check.textContent = isEnabled ? '✔' : '□';
+      });
+    }
+
+    // ===== 性格プリセット =====
+    const PERSONA_KEY = 'cobeing_persona_preset_v1';
+
+    const personaPresets = [
+      {
+        id: 'gentle',
+        emoji: '🕊',
+        label: 'やわらか',
+        description: '静かであたたかく、あなたの気持ちを一番に受け止めるモード。'
+      },
+      {
+        id: 'cheerful',
+        emoji: '🌈',
+        label: 'ポジティブ',
+        description: '少し明るめのテンションで、前向きな面を一緒に探してくれるモード。'
+      },
+      {
+        id: 'coach',
+        emoji: '🔥',
+        label: 'コーチ',
+        description: '勉強やタスク管理の相談向け。やさしくも具体的に背中を押してくれるモード。'
+      },
+      {
+        id: 'honest',
+        emoji: '💬',
+        label: '本音トーク',
+        description: '思っていることを率直に出し合いたいとき用。やさしく本音を伝えてくれるモード。'
+      }
+    ];
+
+    function loadPersonaFromStorage() {
+      const saved = localStorage.getItem(PERSONA_KEY);
+      if (!saved) return 'gentle';
+      const found = personaPresets.some(p => p.id === saved);
+      return found ? saved : 'gentle';
+    }
+
+    function savePersonaToStorage() {
+      localStorage.setItem(PERSONA_KEY, currentPersonaId);
+    }
+
+    function getPersonaLabel(id) {
+      const p = personaPresets.find(p => p.id === id);
+      if (!p) return '🕊 やわらか';
+      return `${p.emoji} ${p.label}`;
+    }
+
+    let currentPersonaId = loadPersonaFromStorage();
+
+    function renderPersonaList() {
+      aiSettingsList.innerHTML = '';
+      personaPresets.forEach(p => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'ai-settings-item';
+        if (p.id === currentPersonaId) item.classList.add('active');
+        item.setAttribute('data-persona-id', p.id);
+
+        const emojiSpan = document.createElement('span');
+        emojiSpan.className = 'ai-settings-emoji';
+        emojiSpan.textContent = p.emoji;
+
+        const textBox = document.createElement('div');
+        const main = document.createElement('div');
+        main.className = 'ai-settings-text-main';
+        main.textContent = p.label;
+
+        const sub = document.createElement('div');
+        sub.className = 'ai-settings-text-sub';
+        sub.textContent = p.description;
+
+        textBox.appendChild(main);
+        textBox.appendChild(sub);
+
+        item.appendChild(emojiSpan);
+        item.appendChild(textBox);
+
+        aiSettingsList.appendChild(item);
+      });
+
+      aiSettingsCurrentLabel.textContent = getPersonaLabel(currentPersonaId);
+      if (typeof updateAiNameUiTexts === "function") updateAiNameUiTexts();
+    }
+
+    function openAiSettings() {
+      renderPersonaList();
+      aiSettingsPanel.classList.add('open');
+    }
+
+    function closeAiSettings() {
+      aiSettingsPanel.classList.remove('open');
+    }
+
+    aiSettingsClose.addEventListener('click', () => {
+      closeAiSettings();
+    });
+
+    aiSettingsList.addEventListener('click', (e) => {
+      const item = e.target.closest('.ai-settings-item');
+      if (!item) return;
+      const id = item.getAttribute('data-persona-id');
+      if (!id || id === currentPersonaId) {
+        closeAiSettings();
+        return;
+      }
+
+      currentPersonaId = id;
+      // ✅ ProfileStoreにも反映して保存
+      const ps = loadProfileStore();
+      ps.ai.personaPreset = currentPersonaId;
+      saveProfileStore(ps);
+
+      savePersonaToStorage();
+      renderPersonaList();
+
+      const now = new Date();
+      const msg = `${getAiDisplayName()}のモードを「${getPersonaLabel(id)}」に切り替えたよ。`;
+      const node = addMessage('bot', msg, { timestamp: now.toISOString() });
+      lastBotMessageNode = node;
+
+      closeAiSettings();
+    });
+
+
+      // ===== プロフィール保存（ProfileStore v2 ベース） =====
+
+      // v2 の中身：
+      // {
+      //   user: {
+      //     nickname, age, gender, role, hobbies, values, dislikes, freeText
+      //   },
+      //   ai: {
+      //     role, mood, personaPreset, freeText
+      //   },
+      //   rel: {
+      //     level, firstMetDate, lastActiveDate
+      //   }
+      // }
+
+      // 空の ProfileStore を作る
+      function createEmptyProfileStore() {
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        const d = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${y}-${m}-${d}`;
+
+        return {
+          user: {
+            nickname: '',
+            age: '',
+            gender: '',
+            role: '',      // いまは「生活リズム」を一時的にここに入れる想定
+            hobbies: '',
+            values: '',
+            dislikes: '',
+            freeText: '',
+            requests: '',
+          },
+          ai: {
+            role: '友達',
+            mood: 'やわらか',
+            personaPreset: currentPersonaId || 'gentle',
+            freeText: '',
+          },
+          rel: {
+            level: 50,
+            firstMetDate: todayStr,
+            lastActiveDate: todayStr,
+            memo: '',
+          },
+        };
+      }
+
+      // 旧 v1 プロフィールをそのまま読む（互換用）
+      function loadLegacyProfileV1Raw() {
+        try {
+          const raw = localStorage.getItem(PROFILE_KEY_V1);
+          if (!raw) return null;
+          const data = JSON.parse(raw);
+          if (!data || typeof data !== 'object') return null;
+
+          return {
+            nickname:   data.nickname   || '',
+            lifeRhythm: data.lifeRhythm || '',
+            values:     data.values     || '',
+            requests:   data.requests   || '',
+          };
+        } catch (e) {
+          console.error('プロフィール v1 読み込み失敗:', e);
+          return null;
+        }
+      }
+
+      // v1 → v2 へのマイグレーション
+      function migrateV1ToV2(legacy) {
+        const store = createEmptyProfileStore();
+        if (!legacy) return store;
+
+        store.user.nickname = legacy.nickname || '';
+        // v1 の lifeRhythm は、いったん user.role に避難させておく
+        store.user.role     = legacy.lifeRhythm || '';
+        store.user.values   = legacy.values || '';
+        // 「相棒へのお願いごと」は AI 側 freeText に避難
+        store.ai.freeText   = legacy.requests || '';
+
+        return store;
+      }
+
+      // v2 の読み込み（なければ v1 からマイグレーション）
+      function loadProfileStore() {
+        try {
+          const raw = localStorage.getItem(PROFILE_KEY_V2);
+          if (raw) {
+            const data = JSON.parse(raw) || {};
+            const base = createEmptyProfileStore();
+
+            return {
+              user: {
+                ...base.user,
+                ...(data.user || {}),
+              },
+              ai: {
+                ...base.ai,
+                ...(data.ai || {}),
+              },
+              rel: {
+                ...base.rel,
+                ...(data.rel || {}),
+              },
+            };
+          }
+        } catch (e) {
+          console.error('プロフィール v2 読み込み失敗:', e);
+        }
+        
+
+        // v2 が無い → v1 があればマイグレーション
+        const legacy = loadLegacyProfileV1Raw();
+        const migrated = migrateV1ToV2(legacy);
+        saveProfileStore(migrated);
+        return migrated;
+      }
+      // ===== 表示名（誰でも版） =====
+      function getUserDisplayName() {
+        const store = loadProfileStore();
+        const n = (store?.user?.nickname || '').trim();
+        return n || 'あなた';
+      }
+
+      // いまはAI名は未実装でOK。将来 store.ai.name を入れたら自動で反映される形にしておく。
+      function getAiDisplayName() {
+        const store = loadProfileStore();
+        const n = (store?.ai?.name || '').trim(); // ←今は存在しないので空になる
+        return n || 'ちと'; // ←未設定時のデフォルト名
+      }
+
+      function updateProfileTitleText() {
+        if (!profileTitleEl) return;
+        profileTitleEl.textContent = `あなた × ${getAiDisplayName()} のプロフィール`;
+      }
+
+      // ===== UI内の「相棒」表記を AI名に同期 =====
+      function updateAiNameUiTexts() {
+        const ai = getAiDisplayName();
+
+        // プロフィールタイトル
+        updateProfileTitleText();
+
+        // プロフィール（AI側）
+        const aiSec = document.getElementById('aiProfileSectionTitle');
+        if (aiSec) aiSec.textContent = `${ai}のプロフィール`;
+
+        const aiRoleLabel = document.querySelector('label[for="aiRole"]');
+        if (aiRoleLabel) aiRoleLabel.textContent = `${ai}の立場`;
+
+        const aiMoodLabel = document.querySelector('label[for="aiMood"]');
+        if (aiMoodLabel) aiMoodLabel.textContent = `${ai}の雰囲気`;
+
+        // 「基本モード」(span.profile-label)
+        try {
+          const field = aiPersonaPresetSelect?.closest?.('.profile-field');
+          const lbl = field ? field.querySelector('.profile-label') : null;
+          if (lbl) lbl.textContent = `${ai}の基本モード（ペルソナ）`;
+        } catch {}
+
+        const aiFreeTextLabel = document.querySelector('label[for="aiFreeText"]');
+        if (aiFreeTextLabel) aiFreeTextLabel.textContent = `${ai}の特徴メモ・話し方の希望`;
+
+        const relMemoLabel = document.getElementById('relMemoLabel');
+        if (relMemoLabel) relMemoLabel.textContent = `あなたと${ai}の関係についてメモしたいこと`;
+
+        // チャット入力欄のplaceholder
+        if (inputEl) inputEl.placeholder = `${ai}に話しかけてみよう`;
+
+        // AI設定パネル
+        const aiSettingsTitle = document.getElementById('aiSettingsTitle');
+        if (aiSettingsTitle) aiSettingsTitle.textContent = `${ai}の性格設定`;
+
+        // Onboarding（表示文だけ整える）
+        const onbHint = document.getElementById('onbAiNameHint');
+        if (onbHint) onbHint.textContent = '※アプリ内のAI名がこの名前に置き換わっていく';
+
+        const onbLabel = document.getElementById('onbAiFreeTextLabel');
+        if (onbLabel) {
+          const name = (onbAiName?.value || '').trim() || ai;
+          onbLabel.textContent = `${name}へのお願い（任意）`;
+        }
+      }
+
+
+
+      // v2 の保存
+      function saveProfileStore(store) {
+        try {
+          localStorage.setItem(PROFILE_KEY_V2, JSON.stringify(store));
+        } catch (e) {
+          console.error('プロフィール v2 保存失敗:', e);
+        }
+      }
+
+      // --- ここから下は「UI & サーバ互換レイヤー」 ---
+      // 既存の profile-view と server.js は、
+      // { nickname, lifeRhythm, values, requests } 形式で動いている前提なので、
+      // 内部の ProfileStore v2 と相互変換する役割。
+
+      function loadProfileFromStorage() {
+        const store = loadProfileStore();
+
+        return {
+          nickname:   (store.user && store.user.nickname) || '',
+          // いまは user.role に生活リズムを避難させている
+          lifeRhythm: (store.user && store.user.role) || '',
+          values:     (store.user && store.user.values) || '',
+          // 「相棒へのお願いごと」は AI 側 freeText から取り出す
+          requests: (store.user && store.user.requests) || '',
+        };
+      }
+
+      function saveProfileToStorage(profileV1Like) {
+        const store = loadProfileStore();
+
+        const safe = profileV1Like || {};
+
+        // v1 の各項目を v2 にマッピング
+        store.user.nickname = safe.nickname || '';
+        store.user.role     = safe.lifeRhythm || '';
+        store.user.values   = safe.values || '';
+        // v1 の「相棒へのお願いごと」は v2 では ai.freeText に統合
+        store.ai.freeText   = safe.requests || '';
+        store.user.requests = safe.requests || ''; // 互換（参照しない想定だが残す）
+        saveProfileStore(store);
+      }
+
+      function applyProfileToForm(profile) {
+        if (!profile) profile = { nickname: '', lifeRhythm: '', values: '', requests: '' };
+        profileNicknameInput.value = profile.nickname || '';
+        profileLifeRhythmSelect.value = profile.lifeRhythm || '';
+        profileValuesTextarea.value = profile.values || '';
+        profileRequestsTextarea.value = profile.requests || '';
+        // v1 の requests は v2 では ai.freeText に統合（表示も揃える）
+        if (typeof aiFreeTextTextarea !== 'undefined') aiFreeTextTextarea.value = profile.requests || '';
+}
+
+      function collectProfileFromForm() {
+        return {
+          nickname: profileNicknameInput.value.trim(),
+          lifeRhythm: profileLifeRhythmSelect.value || '',
+          values: profileValuesTextarea.value.trim(),
+          requests: (aiFreeTextTextarea.value || profileRequestsTextarea.value).trim(),
+        };
+      }
+      function applyProfileStoreToForm(store) {
+        const u = store.user || {};
+        const a = store.ai || {};
+        const r = store.rel || {};
+
+        profileNicknameInput.value = u.nickname || '';
+        profileAgeInput.value = u.age || '';
+        profileGenderInput.value = u.gender || '';
+        profileLifeRhythmSelect.value = u.role || '';
+        profileHobbiesTextarea.value = u.hobbies || '';
+        profileValuesTextarea.value = u.values || '';
+        profileDislikesTextarea.value = u.dislikes || '';
+        //profileFreeTextTextarea.value = u.freeText || ''; 旧版
+        aiRoleSelect.value = a.role || '';
+        aiNameInput.value = a.name || '';
+        aiMoodSelect.value = a.mood || '';
+        aiPersonaPresetSelect.value = a.personaPreset || currentPersonaId || 'gentle';
+        const mergedAiMemo = (a.freeText || u.requests || '').trim();
+        aiFreeTextTextarea.value = mergedAiMemo;
+        // v1 互換用（旧UIの「相棒へのお願いごと」）は非表示だが、中身は同期しておく
+        profileRequestsTextarea.value = mergedAiMemo;
+        relMemoTextarea.value = r.memo || '';
+      }
+
+      function collectProfileStoreFromForm(baseStore) {
+        const store = baseStore || createEmptyProfileStore();
+
+        store.user.nickname = profileNicknameInput.value.trim();
+        store.user.age = profileAgeInput.value.trim();
+        store.user.gender = profileGenderInput.value.trim();
+        store.user.role = profileLifeRhythmSelect.value || '';
+        store.user.hobbies = profileHobbiesTextarea.value.trim();
+        store.user.values = profileValuesTextarea.value.trim();
+        store.user.dislikes = profileDislikesTextarea.value.trim();
+        store.user.freeText = profileFreeTextTextarea.value.trim();
+        const mergedAiMemo = (aiFreeTextTextarea.value || profileRequestsTextarea.value).trim();
+        store.user.requests = mergedAiMemo; // 互換（旧データ/旧UI）
+        store.ai.role = aiRoleSelect.value || '';
+        store.ai.mood = aiMoodSelect.value || '';
+        store.ai.personaPreset = aiPersonaPresetSelect.value || currentPersonaId || 'gentle';
+        store.ai.name = aiNameInput.value.trim();
+        store.ai.freeText = mergedAiMemo;
+        store.rel.memo = relMemoTextarea.value.trim();
+
+        return store;
+      }
+
+
+
+    // ===== 会話保存（StorageModule を使用） =====
+    // saveConversationToStorage と loadConversationFromStorage は StorageModule でハンドル
+    // 利便性のため、グローバル conversation 配列の同期用ラッパーを定義
+
+    // ===== 日付/時間ティ =====
+        // ==============================
+    // ==== 日記（Diary v0）ロジック ====
+    // ==============================
+    const DIARY_KEY = 'cobeing_diary_v1';
+    const MOOD_EMOJIS = ['😢','😞','😐','🙂','😄'];
+
+    // ==============================
+    // ==== カレンダー（Calendar v0）ロジック ====
+    // ==============================
+    const CALENDAR_KEY = 'cobeing_calendar_v1';
+
+    function loadCalendarStore() {
+      const raw = localStorage.getItem(CALENDAR_KEY);
+      if (!raw) return { events: {} };
+      try {
+        const obj = JSON.parse(raw);
+        if (!obj || typeof obj !== 'object') return { events: {} };
+        if (!obj.events || typeof obj.events !== 'object') obj.events = {};
+        return obj;
+      } catch {
+        return { events: {} };
+      }
+    }
+
+    function saveCalendarStore(store) {
+      try {
+        localStorage.setItem(CALENDAR_KEY, JSON.stringify(store));
+      } catch (e) {
+        console.error('カレンダーの保存に失敗:', e);
+      }
+    }
+
+    function getEventsForDate(isoKey) {
+      const store = loadCalendarStore();
+      const list = (store.events && store.events[isoKey]) ? store.events[isoKey] : [];
+      return Array.isArray(list) ? list : [];
+    }
+
+    function setEventsForDate(isoKey, list) {
+      const store = loadCalendarStore();
+      store.events = store.events || {};
+      store.events[isoKey] = list;
+      saveCalendarStore(store);
+    }
+
+    function sortEvents(list) {
+      const copy = [...(list || [])];
+      const toVal = (t) => (t && /^\d\d:\d\d$/.test(t)) ? parseInt(t.slice(0,2),10)*60 + parseInt(t.slice(3,5),10) : 99999;
+      copy.sort((a,b) => {
+        const av = toVal(a.start);
+        const bv = toVal(b.start);
+        if (av !== bv) return av - bv;
+        return (a.title || '').localeCompare((b.title || ''), 'ja');
+      });
+      return copy;
+    }
+
+    function monthLabelJa(year, monthIndex) {
+      return `${year}年 ${monthIndex + 1}月`;
+    }
+
+    function sameIsoDate(a, b) {
+      return (a || '').trim() === (b || '').trim();
+    }
+
+    function getDiaryEntryForDate(isoKey) {
+      const store = loadDiaryStore();
+      return store[isoKey] || null;
+    }
+
+    function getChatCountForDate(isoKey) {
+      // conversation を参照（なければストレージから）
+      const data = Array.isArray(conversation) ? conversation : loadConversationFromStorage();
+      let n = 0;
+      for (const msg of data) {
+        const ts = msg && msg.timestamp;
+        if (!ts) continue;
+        const d = new Date(ts);
+        const k = getIsoDateKey(d);
+        if (k === isoKey) n++;
+      }
+      return n;
+    }
+
+    // 今日の予定（チャット参照用）
+    function getTodayEventsForChat() {
+      const todayKey = getIsoDateKey(new Date());
+      const list = getEventsForDate(todayKey).filter(e => e && e.reflectToChat);
+      const sorted = sortEvents(list);
+      // 文字量が増えすぎないように最大8件
+      return sorted.slice(0, 8).map(e => ({
+        title: e.title || '',
+        start: e.start || '',
+        end: e.end || '',
+        note: e.note || ''
+      }));
+    }
+
+    // 今日/昨日の日記（チャット参照用）
+    // - 保存キー: DIARY_KEY（cobeing_diary_v1）
+    // - 返すのは「要約用の軽い情報」だけ（文字数制限あり）
+    function getDiaryForChatByIsoKey(isoKey) {
+      try {
+        const store = loadDiaryStore();
+        const entry = store && store[isoKey];
+        if (!entry) return null;
+
+        const mood = (typeof entry.mood === 'number') ? entry.mood : null;
+        const moodEmoji = (mood !== null && MOOD_EMOJIS[mood]) ? MOOD_EMOJIS[mood] : '';
+        const line = (entry.line || '').trim();
+        const detail = (entry.detail || '').trim();
+
+        // 最低限「一言」がないものは参照に乗せない（ノイズ防止）
+        if (!line) return null;
+
+        const clip = (s, max) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, max);
+
+        return {
+          date: isoKey,                 // YYYY-MM-DD
+          mood: mood,                   // 0..4 or null
+          moodEmoji: moodEmoji,         // '😢' ... etc
+          line: clip(line, 140),
+          detail: clip(detail, 420),
+        };
+      } catch (e) {
+        console.warn('getDiaryForChatByIsoKey failed:', e);
+        return null;
+      }
+    }
+
+    function getTodayDiaryForChat() {
+      const todayKey = getIsoDateKey(new Date());
+      return getDiaryForChatByIsoKey(todayKey);
+    }
+
+    function getYesterdayDiaryForChat() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      const key = getIsoDateKey(d);
+      return getDiaryForChatByIsoKey(key);
+    }
+
+    // 画面状態
+    const calendarState = {
+      year: new Date().getFullYear(),
+      month: new Date().getMonth(),  // 0-11
+      selectedIso: getIsoDateKey(new Date()),
+    };
+
+    function openCalendarView() {
+      appEl.classList.remove('profile-mode');
+      appEl.classList.remove('diary-mode');
+      appEl.classList.add('calendar-mode');
+
+      // 今日ピル
+      const today = new Date();
+      calTodayPill.textContent = `今日：${formatDateLabelJa(today)}`;
+
+      // 選択は今日が基本（ただし既に state があれば維持）
+      if (!calendarState.selectedIso) calendarState.selectedIso = getIsoDateKey(today);
+      renderCalendarMonth();
+      renderCalendarDayPanel();
+    }
+
+    function closeCalendarView(goToChat = true) {
+      appEl.classList.remove('calendar-mode');
+      if (goToChat) selectTab('chat');
+    }
+
+    function renderCalendarMonth() {
+      if (!calDaysEl) return;
+
+      const year = calendarState.year;
+      const month = calendarState.month;
+
+      if (calMonthLabel) calMonthLabel.textContent = monthLabelJa(year, month);
+
+      const first = new Date(year, month, 1);
+      const startDow = first.getDay(); // 0 Sun
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      const prevMonthDays = new Date(year, month, 0).getDate();
+
+      calDaysEl.innerHTML = '';
+
+      // 6週分（42マス）
+      for (let i = 0; i < 42; i++) {
+        const dayIndex = i - startDow + 1;
+        let cellDate;
+        let isMuted = false;
+
+        if (dayIndex <= 0) {
+          // prev month
+          cellDate = new Date(year, month - 1, prevMonthDays + dayIndex);
+          isMuted = true;
+        } else if (dayIndex > daysInMonth) {
+          // next month
+          cellDate = new Date(year, month + 1, dayIndex - daysInMonth);
+          isMuted = true;
+        } else {
+          cellDate = new Date(year, month, dayIndex);
+        }
+
+        const isoKey = getIsoDateKey(cellDate);
+        const events = getEventsForDate(isoKey);
+        const diary = getDiaryEntryForDate(isoKey);
+        const chatCount = getChatCountForDate(isoKey);
+
+        const cell = document.createElement('div');
+        cell.className = 'cal-day';
+        if (isMuted) cell.classList.add('muted');
+        if (sameIsoDate(isoKey, calendarState.selectedIso)) cell.classList.add('selected');
+
+        const top = document.createElement('div');
+        top.className = 'cal-day-top';
+
+        const num = document.createElement('div');
+        num.className = 'cal-day-num';
+        num.textContent = String(cellDate.getDate());
+
+        const mood = document.createElement('div');
+        mood.className = 'cal-day-mood';
+        const moodIdx = diary && typeof diary.mood === 'number' ? diary.mood : null;
+        mood.textContent = (moodIdx !== null && MOOD_EMOJIS[moodIdx]) ? MOOD_EMOJIS[moodIdx] : '';
+
+        top.appendChild(num);
+        top.appendChild(mood);
+
+        const markers = document.createElement('div');
+        markers.className = 'cal-markers';
+
+        const left = document.createElement('div');
+        left.className = 'cal-count';
+        if (events.length > 0) {
+          const dot = document.createElement('span');
+          dot.className = 'cal-dot';
+          left.appendChild(dot);
+          const t = document.createElement('span');
+          t.textContent = `${events.length}`;
+          left.appendChild(t);
+        } else {
+          left.textContent = '';
+        }
+
+        const right = document.createElement('div');
+        right.className = 'cal-count';
+        right.textContent = chatCount > 0 ? `💬 ${chatCount}` : '';
+
+        markers.appendChild(left);
+        markers.appendChild(right);
+
+        cell.appendChild(top);
+        cell.appendChild(markers);
+
+        cell.addEventListener('click', () => {
+          calendarState.selectedIso = isoKey;
+
+          // 月外の日を押したら月を移動
+          if (cellDate.getMonth() !== month) {
+            calendarState.year = cellDate.getFullYear();
+            calendarState.month = cellDate.getMonth();
+            renderCalendarMonth();
+          } else {
+            // 選択ハイライト更新だけ
+            calDaysEl.querySelectorAll('.cal-day').forEach(el => el.classList.remove('selected'));
+            cell.classList.add('selected');
+          }
+          renderCalendarDayPanel();
+        });
+
+        calDaysEl.appendChild(cell);
+      }
+
+      // 選択ピル
+      const selectedDate = isoToDate(calendarState.selectedIso);
+      if (calSelectedPill && selectedDate) {
+        calSelectedPill.textContent = `選択：${formatDateLabelJa(selectedDate)}`;
+      }
+    }
+
+    function isoToDate(isoKey) {
+      if (!isoKey || !/^\d{4}-\d{2}-\d{2}$/.test(isoKey)) return null;
+      const [y,m,d] = isoKey.split('-').map(n => parseInt(n,10));
+      return new Date(y, m-1, d);
+    }
+
+    function renderCalendarDayPanel() {
+      const isoKey = calendarState.selectedIso;
+      const date = isoToDate(isoKey) || new Date();
+
+      // title/sub
+      if (calPanelTitle) calPanelTitle.textContent = formatDateLabelJa(date);
+
+      const events = sortEvents(getEventsForDate(isoKey));
+      const diary = getDiaryEntryForDate(isoKey);
+      const chatCount = getChatCountForDate(isoKey);
+
+      if (calPanelSub) {
+        const parts = [];
+        parts.push(events.length ? `予定 ${events.length}件` : '予定なし');
+        parts.push(diary && (diary.line || '').trim() ? '日記あり' : '日記なし');
+        parts.push(chatCount ? `会話 ${chatCount}` : '会話なし');
+        calPanelSub.textContent = parts.join(' / ');
+      }
+
+      // events list
+      if (calEventsList) {
+        calEventsList.innerHTML = '';
+        if (events.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'cal-empty';
+          empty.textContent = '予定がまだないよ。必要な分だけ入れていこ。';
+          calEventsList.appendChild(empty);
+        } else {
+          for (const ev of events) {
+            const wrap = document.createElement('div');
+            wrap.className = 'cal-event';
+
+            const top = document.createElement('div');
+            top.className = 'cal-event-top';
+
+            const left = document.createElement('div');
+
+            const title = document.createElement('div');
+            title.className = 'cal-event-title';
+            title.textContent = ev.title || '(無題)';
+
+            const meta = document.createElement('div');
+            meta.className = 'cal-event-meta';
+
+            const timeTxt = (() => {
+              const s = (ev.start || '').trim();
+              const e = (ev.end || '').trim();
+              if (s && e) return `${s}〜${e}`;
+              if (s) return `${s}〜`;
+              if (e) return `〜${e}`;
+              return '終日/未設定';
+            })();
+
+            const t1 = document.createElement('span');
+            t1.textContent = `⏰ ${timeTxt}`;
+            meta.appendChild(t1);
+
+            if (ev.reflectToChat) {
+              const t2 = document.createElement('span');
+              t2.textContent = '💬 チャット参照';
+              meta.appendChild(t2);
+            }
+
+            const note = (ev.note || '').trim();
+            if (note) {
+              const t3 = document.createElement('span');
+              t3.textContent = `📝 ${note}`;
+              meta.appendChild(t3);
+            }
+
+            left.appendChild(title);
+            left.appendChild(meta);
+
+            const actions = document.createElement('div');
+            actions.className = 'cal-event-actions';
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'cal-mini-btn danger';
+            delBtn.type = 'button';
+            delBtn.textContent = '削除';
+            delBtn.addEventListener('click', () => {
+              const ok = window.confirm('この予定を削除する？');
+              if (!ok) return;
+              const list = getEventsForDate(isoKey).filter(x => x && x.id !== ev.id);
+              setEventsForDate(isoKey, list);
+              renderCalendarMonth();
+              renderCalendarDayPanel();
+            });
+
+            actions.appendChild(delBtn);
+
+            top.appendChild(left);
+            top.appendChild(actions);
+
+            wrap.appendChild(top);
+            calEventsList.appendChild(wrap);
+          }
+        }
+      }
+
+      // diary box
+      if (calDiaryBox) {
+        const line = diary && (diary.line || '').trim();
+        if (line) {
+          const moodIdx = typeof diary.mood === 'number' ? diary.mood : null;
+          const moodEmoji = (moodIdx !== null && MOOD_EMOJIS[moodIdx]) ? MOOD_EMOJIS[moodIdx] : '';
+          const detail = (diary.detail || '').trim();
+          calDiaryBox.className = '';
+          calDiaryBox.innerHTML = `
+            <div style="font-size:12px;color:#111827;"><span style="margin-right:6px;">${moodEmoji}</span>${escapeHtml(line)}</div>
+            ${detail ? `<div style="font-size:11px;color:#6b7280;margin-top:6px;white-space:pre-wrap;">${escapeHtml(detail)}</div>` : ''}
+          `;
+        } else {
+          calDiaryBox.className = 'cal-empty';
+          calDiaryBox.textContent = 'この日の記録はまだないよ。';
+        }
+      }
+
+      // chat box
+      if (calChatBox) {
+        if (chatCount) {
+          calChatBox.className = '';
+          calChatBox.textContent = `この日の会話：${chatCount}件（※詳細表示は後で追加予定）`;
+        } else {
+          calChatBox.className = 'cal-empty';
+          calChatBox.textContent = 'この日の会話はまだないよ。';
+        }
+      }
+
+      // selected pill
+      if (calSelectedPill) calSelectedPill.textContent = `選択：${formatDateLabelJa(date)}`;
+    }
+
+    function escapeHtml(s) {
+      return String(s || '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+    }
+
+    function openEventSheetForSelectedDate() {
+      const isoKey = calendarState.selectedIso || getIsoDateKey(new Date());
+      const d = isoToDate(isoKey) || new Date();
+
+      // fill
+      calSheetTitle.textContent = '予定を追加';
+      calSheetSub.textContent = `${formatDateLabelJa(d)} に追加するよ`;
+      calTitleInput.value = '';
+      calStartInput.value = '';
+      calEndInput.value = '';
+      calNoteInput.value = '';
+      calReflectToggle.checked = true;
+
+      calSheet.classList.add('open');
+      setTimeout(() => { try { calTitleInput.focus(); } catch {} }, 30);
+    }
+
+    function closeEventSheet() {
+      calSheet.classList.remove('open');
+    }
+
+    function saveEventFromSheet() {
+      const isoKey = calendarState.selectedIso || getIsoDateKey(new Date());
+      const title = (calTitleInput.value || '').trim();
+      if (!title) {
+        alert('タイトルを入れてね');
+        return;
+      }
+      const start = (calStartInput.value || '').trim();
+      const end = (calEndInput.value || '').trim();
+      const note = (calNoteInput.value || '').trim();
+
+      const ev = {
+        id: 'e_' + Math.random().toString(36).slice(2, 10),
+        title,
+        start,
+        end,
+        note,
+        reflectToChat: !!calReflectToggle.checked,
+        createdAt: new Date().toISOString()
+      };
+
+      const list = getEventsForDate(isoKey);
+      list.push(ev);
+      setEventsForDate(isoKey, list);
+
+      closeEventSheet();
+      renderCalendarMonth();
+      renderCalendarDayPanel();
+    }
+
+    // カレンダーUIイベント
+    if (calendarCloseBtn) calendarCloseBtn.addEventListener('click', () => closeCalendarView(true));
+    if (calPrevBtn) calPrevBtn.addEventListener('click', () => {
+      const d = new Date(calendarState.year, calendarState.month - 1, 1);
+      calendarState.year = d.getFullYear();
+      calendarState.month = d.getMonth();
+      renderCalendarMonth();
+    });
+    if (calNextBtn) calNextBtn.addEventListener('click', () => {
+      const d = new Date(calendarState.year, calendarState.month + 1, 1);
+      calendarState.year = d.getFullYear();
+      calendarState.month = d.getMonth();
+      renderCalendarMonth();
+    });
+    if (calAddBtn) calAddBtn.addEventListener('click', () => openEventSheetForSelectedDate());
+
+    if (calSheetCloseBtn) calSheetCloseBtn.addEventListener('click', closeEventSheet);
+    if (calSheetCancelBtn) calSheetCancelBtn.addEventListener('click', closeEventSheet);
+    if (calSheetSaveBtn) calSheetSaveBtn.addEventListener('click', saveEventFromSheet);
+
+
+
+    let diarySelectedMood = null; // 0..4
+
+    function getIsoDateKey(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`; // YYYY-MM-DD
+    }
+
+    function loadDiaryStore() {
+      const raw = localStorage.getItem(DIARY_KEY);
+      if (!raw) return {};
+      try {
+        const obj = JSON.parse(raw);
+        return (obj && typeof obj === 'object') ? obj : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveDiaryStore(store) {
+      localStorage.setItem(DIARY_KEY, JSON.stringify(store));
+    }
+
+    function calcStreak(store, today = new Date()) {
+      // 今日から遡って連続で書けてる日数
+      let streak = 0;
+      for (let i = 0; i < 3660; i++) {
+        const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+        const key = getIsoDateKey(d);
+        if (store[key] && store[key].line && store[key].line.trim()) streak++;
+        else break;
+      }
+      return streak;
+    }
+
+    function setDiarySavedState(text) {
+      diarySavedHint.textContent = text;
+    }
+
+    function validateDiaryForm() {
+      const lineOk = (diaryLineInput.value || '').trim().length > 0;
+      const moodOk = (diarySelectedMood !== null);
+      const ok = lineOk && moodOk;
+
+      diarySaveBtn.disabled = !ok;
+      diarySaveHint.textContent = ok ? '保存できるよ' : '気分＋一言で保存できるよ';
+    }
+
+    function renderMoodSelection() {
+      diaryMoodRow.querySelectorAll('.diary-mood-btn').forEach(btn => {
+        const v = parseInt(btn.getAttribute('data-mood'), 10);
+        btn.classList.toggle('selected', v === diarySelectedMood);
+      });
+    }
+
+    function loadTodayIntoDiaryForm() {
+      const store = loadDiaryStore();
+      const today = new Date();
+      const key = getIsoDateKey(today);
+      const entry = store[key];
+
+      if (entry) {
+        diarySelectedMood = typeof entry.mood === 'number' ? entry.mood : null;
+        diaryLineInput.value = entry.line || '';
+        diaryDetailInput.value = entry.detail || '';
+        if ((entry.detail || '').trim().length > 0) {
+          diaryDetailBox.classList.add('open');
+          diaryDetailToggle.textContent = '➖ 閉じる（任意）';
+        } else {
+          diaryDetailBox.classList.remove('open');
+          diaryDetailToggle.textContent = '➕ もう少し書く（任意）';
+        }
+        setDiarySavedState('保存済み');
+      } else {
+        diarySelectedMood = null;
+        diaryLineInput.value = '';
+        diaryDetailInput.value = '';
+        diaryDetailBox.classList.remove('open');
+        diaryDetailToggle.textContent = '➕ もう少し書く（任意）';
+        setDiarySavedState('未保存');
+      }
+
+      renderMoodSelection();
+      validateDiaryForm();
+
+      // ヘッダ表示
+      diaryDatePill.textContent = formatDateLabelJa(today);
+      diaryDayPill.textContent = `Day ${calcDayDiffFromFirst(today)}`;
+      diaryStreakPill.textContent = `🔥 ${calcStreak(store, today)}`;
+
+      renderDiaryHistory(store, today);
+    }
+
+    function renderDiaryHistory(store, today = new Date()) {
+      // 直近7日のうち「書いてある日」だけ表示（圧を減らす）
+      const items = [];
+      for (let i = 0; i < 14; i++) { // 2週間分探して最大7件拾う
+        const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+        const key = getIsoDateKey(d);
+        const entry = store[key];
+        if (entry && (entry.line || '').trim()) {
+          items.push({ date: d, key, entry });
+          if (items.length >= 7) break;
+        }
+      }
+
+      diaryHistoryList.innerHTML = '';
+
+      if (items.length === 0) {
+        diaryHistorySub.textContent = 'まだ記録がないよ';
+        const empty = document.createElement('div');
+        empty.className = 'diary-save-hint';
+        empty.textContent = '最初の1回は、短い一言だけでもOK。';
+        diaryHistoryList.appendChild(empty);
+        return;
+      }
+
+      diaryHistorySub.textContent = `表示中：${items.length}件`;
+
+      items.forEach(({ date, key, entry }) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'diary-history-item';
+
+        const head = document.createElement('div');
+        head.className = 'diary-history-head';
+
+        const left = document.createElement('div');
+        left.className = 'diary-history-date';
+        left.textContent = formatDateLabelJa(date);
+
+        const right = document.createElement('div');
+        right.className = 'diary-history-mood';
+        const mood = (typeof entry.mood === 'number') ? entry.mood : null;
+        right.textContent = mood !== null ? MOOD_EMOJIS[mood] : '';
+
+        head.appendChild(left);
+        head.appendChild(right);
+
+        const line = document.createElement('div');
+        line.className = 'diary-history-line';
+        line.textContent = entry.line || '';
+
+        wrap.appendChild(head);
+        wrap.appendChild(line);
+
+        const detailText = (entry.detail || '').trim();
+        if (detailText) {
+          const detail = document.createElement('div');
+          detail.className = 'diary-history-detail';
+          detail.textContent = detailText;
+          wrap.appendChild(detail);
+        }
+
+        diaryHistoryList.appendChild(wrap);
+      });
+    }
+
+    function openDiaryView() {
+      appEl.classList.remove('profile-mode');
+      appEl.classList.add('diary-mode');
+      loadTodayIntoDiaryForm();
+    }
+
+    function closeDiaryView(goToChat = true) {
+      appEl.classList.remove('diary-mode');
+      if (goToChat) selectTab('chat');
+    }
+
+    // ---- Diaryイベント ----
+    if (diaryCloseBtn) {
+      diaryCloseBtn.addEventListener('click', () => {
+        closeDiaryView(true);
+      });
+    }
+
+    if (diaryMoodRow) {
+      diaryMoodRow.addEventListener('click', (e) => {
+        const btn = e.target.closest('.diary-mood-btn');
+        if (!btn) return;
+        const v = parseInt(btn.getAttribute('data-mood'), 10);
+        diarySelectedMood = Number.isFinite(v) ? v : null;
+        renderMoodSelection();
+        validateDiaryForm();
+        setDiarySavedState('未保存');
+      });
+    }
+
+    if (diaryDetailToggle) {
+      diaryDetailToggle.addEventListener('click', () => {
+        const open = diaryDetailBox.classList.toggle('open');
+        diaryDetailToggle.textContent = open ? '➖ 閉じる（任意）' : '➕ もう少し書く（任意）';
+      });
+    }
+
+    if (diaryLineInput) {
+      diaryLineInput.addEventListener('input', () => {
+        validateDiaryForm();
+        setDiarySavedState('未保存');
+      });
+    }
+
+    if (diaryDetailInput) {
+      diaryDetailInput.addEventListener('input', () => {
+        setDiarySavedState('未保存');
+      });
+    }
+
+    if (diarySaveBtn) {
+      diarySaveBtn.addEventListener('click', () => {
+        const line = (diaryLineInput.value || '').trim();
+        if (diarySelectedMood === null || !line) return;
+
+        const detail = (diaryDetailInput.value || '').trim();
+        const store = loadDiaryStore();
+        const today = new Date();
+        const key = getIsoDateKey(today);
+
+        store[key] = {
+          mood: diarySelectedMood,
+          line,
+          detail,
+          updatedAt: new Date().toISOString()
+        };
+
+        saveDiaryStore(store);
+
+        setDiarySavedState('保存したよ');
+        diaryStreakPill.textContent = `🔥 ${calcStreak(store, today)}`;
+        renderDiaryHistory(store, today);
+
+        // ★ 日記保存直後のAIリアクション生成
+        const moodEmoji = MOOD_EMOJIS[diarySelectedMood] || '';
+        generateDiaryReaction(moodEmoji, line, detail);
+      });
+    }
+
+    function formatDateTime(date) {
+      const y = date.getFullYear();
+      const mo = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const h = String(date.getHours()).padStart(2, '0');
+      const mi = String(date.getMinutes()).padStart(2, '0');
+      return `${y}/${mo}/${d} ${h}:${mi}`;
+    }
+
+    function formatTimeHHMM(date) {
+      const h = String(date.getHours()).padStart(2, '0');
+      const mi = String(date.getMinutes()).padStart(2, '0');
+      return `${h}:${mi}`;
+    }
+
+    function getDateKey(date) {
+      const y = date.getFullYear();
+      const mo = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}${mo}${d}`;
+    }
+
+    function formatDateLabelJa(date) {
+      const mo = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+      const w = weekdays[date.getDay()];
+      return `${mo}/${d}（${w}）`;
+    }
+
+    function getOrInitFirstUseDateKey() {
+      let first = localStorage.getItem('cobeing_first_date');
+      if (!first) {
+        const today = new Date();
+        first = getDateKey(today);
+        localStorage.setItem('cobeing_first_date', first);
+      }
+      return first;
+    }
+
+    function calcDayDiffFromFirst(date) {
+      const firstKey = getOrInitFirstUseDateKey();
+      const y1 = parseInt(firstKey.slice(0, 4), 10);
+      const m1 = parseInt(firstKey.slice(4, 6), 10) - 1;
+      const d1 = parseInt(firstKey.slice(6, 8), 10);
+      const firstDate = new Date(y1, m1, d1);
+      const currentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const diffMs = currentDate - firstDate;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      return diffDays + 1;
+    }
+
+    function getTimeSegment() {
+      const hour = new Date().getHours();
+      if (hour >= 5 && hour < 11) return 'morning';
+      if (hour >= 11 && hour < 17) return 'day';
+      if (hour >= 17 && hour < 23) return 'evening';
+      return 'night';
+    }
+
+    function getTimeSegmentIconForDate(date) {
+      const hour = date.getHours();
+      if (hour >= 5 && hour < 11) return '🌤';
+      if (hour >= 11 && hour < 17) return '🌞';
+      if (hour >= 17 && hour < 23) return '🌆';
+      return '🌙';
+    }
+
+    function applyTimeTheme() {
+      const seg = getTimeSegment();
+      appEl.classList.remove('morning', 'day', 'evening', 'night');
+      appEl.classList.add(seg);
+    }
+
+    function getTimeBasedGreeting() {
+      const user = getUserDisplayName();
+      const seg = getTimeSegment();
+      switch (seg) {
+        case 'morning':
+          return `おはよ、${user}。\n今日も一緒にゆっくり進めていこ。\nよかったら今日やりたいこと、ざっと教えて？`;
+        case 'day':
+          return `こんにちは、${user}。\n今どんな時間帯かな？\n気分とかタスク整理したかったら手伝うよ。`;
+        case 'evening':
+          return `今日もおつかれさま、${user}。\n一旦ここまでの一日、どうだった？\n軽く振り返る？`;
+        case 'night':
+        default:
+          return `こんな時間まで起きてるんだね、${user}。\n大丈夫？眠くない？\n無理しすぎなくていいからね。`;
+      }
+    }
+
+
+    function getStatusText() {
+      const seg = getTimeSegment();
+      const now = new Date();
+      const timeStr = formatTimeHHMM(now);
+
+      if (seg === 'morning') {
+        return {
+          main: `🌤 朝モード｜今 ${timeStr}`,
+          sub: "今日のペース：ゆっくりスタートでOK"
+        };
+      }
+      if (seg === 'day') {
+        return {
+          main: `🌞 昼モード｜今 ${timeStr}`,
+          sub: "集中：ほどほどで大丈夫"
+        };
+      }
+      if (seg === 'evening') {
+        return {
+          main: `🌆 夕方モード｜今 ${timeStr}`,
+          sub: `今日の${getUserDisplayName()}：おつかれさまタイム`
+        };
+      }
+      return {
+        main: `🌙 夜モード｜今 ${timeStr}`,
+        sub: "無理しないで休むモード優先で"
+      };
+    }
+
+    function updateStatusBar() {
+      const { main, sub } = getStatusText();
+      const mainSpan = statusBarEl.querySelector(".status-label-main");
+      const subSpan = statusBarEl.querySelector(".status-label-sub");
+      if (mainSpan) mainSpan.textContent = main;
+      if (subSpan) subSpan.textContent = sub;
+    }
+
+    function insertDateSeparator(date) {
+      const wrap = document.createElement('div');
+      wrap.className = 'date-separator-wrapper';
+
+      const band = document.createElement('div');
+      band.className = 'date-separator';
+
+      const mainSpan = document.createElement('span');
+      mainSpan.className = 'date-separator-main';
+
+      const subSpan = document.createElement('span');
+      subSpan.className = 'date-separator-sub';
+
+      const icon = getTimeSegmentIconForDate(date);
+      const label = formatDateLabelJa(date);
+      const dayCount = calcDayDiffFromFirst(date);
+
+      mainSpan.textContent = `${icon} ${label}`;
+      subSpan.textContent = `Day ${dayCount} with CoBeing`;
+
+      band.appendChild(mainSpan);
+      band.appendChild(subSpan);
+      wrap.appendChild(band);
+
+      messagesEl.appendChild(wrap);
+    }
+
+    // ===== メッセージ表示 =====
+    function addMessage(sender, text, options = {}) {
+      const date = options.timestamp ? new Date(options.timestamp) : new Date();
+      const dateKey = getDateKey(date);
+
+      if (lastMessageDateKey !== dateKey) {
+        insertDateSeparator(date);
+        lastMessageDateKey = dateKey;
+      }
+
+      const msgWrapper = document.createElement('div');
+      const timeSpan = document.createElement('div');
+      const msgDiv = document.createElement('div');
+
+      timeSpan.className = 'timestamp';
+      timeSpan.textContent = formatDateTime(date);
+
+      msgDiv.className = 'message ' + (sender === 'bot' ? 'bot' : 'user');
+
+      if (options.type === 'image' && options.imageSrc) {
+        const img = document.createElement('img');
+        img.src = options.imageSrc;
+        img.alt = '送信された画像';
+        msgDiv.appendChild(img);
+        if (text) {
+          const caption = document.createElement('div');
+          caption.textContent = text;
+          msgDiv.appendChild(caption);
+        }
+      } else {
+        msgDiv.textContent = text;
+      }
+
+      msgWrapper.appendChild(timeSpan);
+      msgWrapper.appendChild(msgDiv);
+      messagesEl.appendChild(msgWrapper);
+
+      messagesEl.parentElement.scrollTop = messagesEl.parentElement.scrollHeight;
+
+      return msgWrapper;
+    }
+
+    // ===== 気分判定 =====
+    function detectMoodFromText(text) {
+      if (!text) return 'neutral';
+
+      const tiredWords = ["疲れ", "つかれ", "しんど", "だる", "無理", "限界", "しんどい"];
+      const taskWords = ["タスク", "やること", "課題", "レポート", "レポ", "勉強", "テスト", "試験", "掃除", "片付け", "かたづけ"];
+      const positiveWords = ["楽しい", "たのしい", "うれしい", "嬉しい", "ありがとう", "助か", "最高", "ワクワク"];
+
+      if (tiredWords.some(w => text.includes(w))) return 'tired';
+      if (taskWords.some(w => text.includes(w))) return 'task';
+      if (positiveWords.some(w => text.includes(w))) return 'positive';
+
+      return 'neutral';
+    }
+
+    function updateInputMood(text) {
+      const mood = detectMoodFromText(text);
+
+      inputAreaEl.classList.remove('mood-tired', 'mood-task', 'mood-positive');
+
+      if (mood === 'tired') {
+        inputAreaEl.classList.add('mood-tired');
+        inputMoodHintEl.textContent = "しんどい時モード：今日は『最低限』だけでもいいよ。";
+        inputEl.placeholder = "しんどい気持ち、そのまま書いても大丈夫だよ";
+      } else if (mood === 'task') {
+        inputAreaEl.classList.add('mood-task');
+        inputMoodHintEl.textContent = "タスク整理モード：大きいことも小さく分けて一緒にやろ。";
+        inputEl.placeholder = "今日やることをざっと書き出してみよっか";
+      } else if (mood === 'positive') {
+        inputAreaEl.classList.add('mood-positive');
+        inputMoodHintEl.textContent = "うれしいことモード：良かったこと、ここに残しておこ。";
+        inputEl.placeholder = "うれしかったこと、良かったことを書いておこう";
+      } else {
+        inputMoodHintEl.textContent = "今の気持ちや今日のこと、自由に書いてみてね。";
+        inputEl.placeholder = `${getAiDisplayName()}に話しかけてみよう`;
+      }
+    }
+
+    // ===== 日記リアクション生成 =====
+    async function generateDiaryReaction(moodEmoji, line, detail) {
+      try {
+        const profileStore = loadProfileStore();
+        const timeInfo = buildTimeInfoForAPI();
+
+        // 日記内容を整形
+        const diaryText = `${moodEmoji ? moodEmoji + ' ' : ''}${line}${detail ? '\n詳細: ' + detail : ''}`;
+
+        // リアクション専用のプリアンブル付きメッセージ
+        const reactionPrompt = (
+          '【日記が保存されました】\n' +
+          '以下は、ユーザーが今日保存した日記です。\n\n' +
+          diaryText + '\n\n' +
+          '↑この日記に対する短いリアクション（1行要約 → 共感・感想 → 返しやすい質問の形式）をしてください。' +
+          '短く、温かく、次の対話を促すようにしてください。'
+        );
+
+        const payload = {
+          aiName: getAiDisplayName(),
+          userName: getUserDisplayName(),
+          personaPreset: profileStore?.ai?.personaPreset || currentPersonaId || 'gentle',
+          conversation: conversation.slice(-10),
+          timeInfo,
+          todayEvents: getTodayEventsForChat(),
+          userProfile: profileStore,
+        };
+
+        // ★ リアクション専用の user メッセージを追加
+        const payloadWithReaction = JSON.parse(JSON.stringify(payload));
+        payloadWithReaction.conversation = payloadWithReaction.conversation.concat([
+          {
+            role: 'user',
+            text: reactionPrompt,
+            imageBase64: null,
+            timestamp: new Date().toISOString(),
+          }
+        ]);
+        // Include diary context so server's system prompt has explicit diary data
+        payloadWithReaction.todayDiary = getTodayDiaryForChat();
+        payloadWithReaction.yesterdayDiary = getYesterdayDiaryForChat();
+
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payloadWithReaction),
+        });
+
+        const data = await res.json();
+        const reactionText = data && data.reply ? data.reply : null;
+
+        if (!reactionText) {
+          console.warn('[diary reaction] No reply from API');
+          return;
+        }
+
+        // ★ AIリアクションをチャット画面に追加 & 会話履歴に保存
+        const botNow = new Date();
+        const botTimestamp = botNow.toISOString();
+
+        const botNode = addMessage('bot', reactionText, { timestamp: botTimestamp });
+        lastBotMessageNode = botNode;
+
+        conversation.push({
+          role: 'assistant',
+          text: reactionText,
+          imageBase64: null,
+          timestamp: botTimestamp,
+        });
+        StorageModule.saveConversation(conversation);
+
+        console.log('[diary reaction] success:', reactionText.slice(0, 50) + '...');
+      } catch (err) {
+        console.error('[diary reaction] failed:', err);
+      }
+    }
+
+    // ===== timeInfo（API用）=== helpers.js 参照 =====
+    // buildTimeInfoForAPI() は HelperModule で定義
+
+    // ===== 返信中UI管理 === ui-replying.js 参照 =====
+    // UIReplyingModule で一元管理
+
+    // 仮バブルを削除
+    function removeReplyingBubble() {
+      const bubble = document.querySelector('[data-replying-bubble="true"]');
+      if (bubble) {
+        bubble.remove();
+      }
+    }
+
+    // ステータスバーを返信中表示に変更
+    function updateStatusBarReplying(isReplying) {
+      const statusSub = document.querySelector('.status-label-sub');
+      if (!statusSub) return;
+
+      if (isReplying) {
+        statusSub.innerHTML = `<span class="replying" style="font-size: 12px;">
+          返信中…
+          <span class="dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </span>`;
+      } else {
+        // updateStatusBar() で通常表示に戻す
+        updateStatusBar();
+      }
+    }
+
+    // ===== 送信処理 =====
+    async function handleSend() {
+      const text = inputEl.value.trim();
+      if (!text && !pendingImageSrc && !pendingImageBase64) return;
+
+      const displayText = text || (pendingImageSrc ? "（画像）" : "");
+      const now = new Date();
+      const timestamp = now.toISOString();
+
+      // 画面にユーザーメッセージを追加
+      let userNode;
+      if (pendingImageSrc) {
+        userNode = addMessage('user', text, {
+          type: 'image',
+          imageSrc: pendingImageBase64 || pendingImageSrc, // ←ここがポイント
+          timestamp,
+        });
+
+        try { URL.revokeObjectURL(pendingImageSrc); } catch {}
+        pendingImageSrc = null;
+      } else {
+        userNode = addMessage('user', text, { timestamp });
+      }
+
+      lastUserMessageNode = userNode;
+
+      // 会話データに追加
+      const userEntry = {
+        role: 'user',
+        text: displayText || "（画像のみ）",
+        imageBase64: pendingImageBase64 || null,
+        timestamp,
+      };
+      conversation.push(userEntry);
+      saveConversationToStorage();
+
+      inputEl.value = "";
+      updateInputMood("");
+
+      // ===== 返信中UI表示開始 =====
+      // inflightToken を生成（複数送信対策）
+      const currentToken = Symbol('inflight');
+      inflightToken = currentToken;
+
+      // 仮バブルを追加
+      createReplyingBubble();
+
+      // ステータスバーを返信中表示に
+      updateStatusBarReplying(true);
+
+      // 送信ボタンを無効化（オプション）
+      sendBtn.disabled = true;
+
+    try {
+
+      // --- ユーザーの呼び名（ニックネーム）を優先 ---
+
+      const timeInfo = buildTimeInfoForAPI();
+      const profileStore = loadProfileStore();
+
+      const payload = {
+        aiName: getAiDisplayName(),
+        userName: getUserDisplayName(),
+        personaPreset: profileStore?.ai?.personaPreset || currentPersonaId || 'gentle',
+        conversation: conversation,   // ✅ messages じゃなく conversation
+        timeInfo,
+        todayEvents: getTodayEventsForChat(),
+        todayDiary: getTodayDiaryForChat(),
+        yesterdayDiary: getYesterdayDiaryForChat(),
+        userProfile: profileStore     // ✅ profile じゃなく profileStore（サーバ側が userProfile を期待してるならこれ）
+      };
+
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+
+        const replyText =
+          data && data.reply
+            ? data.reply
+            : "返信の取得に失敗しちゃった…もう一度送ってみてくれる？";
+
+        // ===== 返信中UIクリーンアップ =====
+        // 最後のリクエストのみが仮バブルを消す
+        if (inflightToken === currentToken) {
+          removeReplyingBubble();
+          updateStatusBarReplying(false);
+          sendBtn.disabled = false;
+        }
+
+        const botNow = new Date();
+        const botTimestamp = botNow.toISOString();
+
+        const botNode = addMessage('bot', replyText, { timestamp: botTimestamp });
+        lastBotMessageNode = botNode;
+
+        conversation.push({
+          role: 'assistant',
+          text: replyText,
+          imageBase64: null,
+          timestamp: botTimestamp,
+        });
+        saveConversationToStorage();
+      } catch (e) {
+        console.error('送信エラー:', e);
+
+        // ===== 返信中UIクリーンアップ =====
+        // 最後のリクエストのみが仮バブルを消す
+        if (inflightToken === currentToken) {
+          removeReplyingBubble();
+          updateStatusBarReplying(false);
+          sendBtn.disabled = false;
+        }
+
+        const botNow = new Date();
+        const botTimestamp = botNow.toISOString();
+        const fallback = "サーバー側でエラーが起きちゃったみたい。\n時間をおいてもう一度送ってみてくれる？";
+
+        const botNode = addMessage('bot', fallback, { timestamp: botTimestamp });
+        lastBotMessageNode = botNode;
+
+        conversation.push({
+          role: 'assistant',
+          text: fallback,
+          imageBase64: null,
+          timestamp: botTimestamp,
+        });
+        saveConversationToStorage();
+      } finally {
+        pendingImageBase64 = null;
+      }
+    }
+
+    // ===== 取消 =====
+    function handleUndo() {
+      if (lastBotMessageNode && lastBotMessageNode.parentNode) {
+        lastBotMessageNode.parentNode.removeChild(lastBotMessageNode);
+      }
+      if (lastUserMessageNode && lastUserMessageNode.parentNode) {
+        lastUserMessageNode.parentNode.removeChild(lastUserMessageNode);
+      }
+      lastBotMessageNode = null;
+      lastUserMessageNode = null;
+
+      for (let i = 0; i < 2; i++) {
+        if (conversation.length === 0) break;
+        conversation.pop();
+      }
+      saveConversationToStorage();
+    }
+
+    // ===== 画像選択 =====
+    imageBtn.addEventListener('click', () => {
+      imageInput.click();
+    });
+
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      // ✅ MIMEで弾く（HEIC/BMP/TIFF などをブロック）
+      const mime = (file.type || '').toLowerCase();
+      if (!ALLOWED_IMAGE_MIME.has(mime)) {
+        addMessage('bot',
+          "この画像形式は今は送れないみたい…🙏\n" +
+          "対応してるのは：PNG / JPEG(JPG) / GIF / WEBP だけだよ。\n" +
+          "（iPhoneのHEICは、共有→画像保存→JPEGで書き出すか、変換してから試してね）",
+          { timestamp: new Date().toISOString() }
+        );
+
+        // 送信待ちをリセット
+        pendingImageSrc = null;
+        pendingImageBase64 = null;
+        imageInput.value = "";
+        return;
+      }
+
+      // ✅ サイズ制限（任意）
+      const sizeMB = file.size / (1024 * 1024);
+      if (sizeMB > MAX_IMAGE_MB) {
+        addMessage('bot',
+          `画像が大きすぎるかも…🙏（${sizeMB.toFixed(1)}MB）\n` +
+          `${MAX_IMAGE_MB}MB以下にして送ってみてね。`,
+          { timestamp: new Date().toISOString() }
+        );
+        pendingImageSrc = null;
+        pendingImageBase64 = null;
+        imageInput.value = "";
+        return;
+      }
+
+      // ここから通常処理
+      if (pendingImageSrc) {
+        try { URL.revokeObjectURL(pendingImageSrc); } catch {}
+      }
+      pendingImageSrc = URL.createObjectURL(file);
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingImageBase64 = reader.result;
+
+        addMessage('bot',
+          "画像をセットしたよ。\nこのままメッセージを書いて『送信』すると、一緒に送られるよ。",
+          { timestamp: new Date().toISOString() }
+        );
+      };
+      reader.readAsDataURL(file);
+
+      imageInput.value = "";
+    });
+
+
+    // ===== メニュー =====
+    menuToggle.addEventListener('click', () => {
+      dropdownMenu.classList.toggle('open');
+    });
+
+    dropdownMenu.addEventListener('click', (e) => {
+      const check = e.target.closest('.dropdown-check');
+      if (check) {
+        e.stopPropagation();
+        const id = check.getAttribute('data-check-for');
+        if (!id) return;
+
+        const isEnabled = enabledTabs.includes(id);
+        if (isEnabled) {
+          if (enabledTabs.length === 1) {
+            addMessage('bot', "少なくとも1つはメニューを残したいな。\nもし迷ったら、とりあえずチャットだけにしておくのもアリだよ。", {
+              timestamp: new Date().toISOString(),
+            });
+            return;
+          }
+          enabledTabs = enabledTabs.filter(tid => tid !== id);
+          if (!enabledTabs.includes(activeTabId)) {
+            activeTabId = enabledTabs[0];
+          }
+        } else {
+          enabledTabs.push(id);
+        }
+
+        StorageModule.saveEnabledTabs(enabledTabs);
+        renderTopNav();
+        selectTab(activeTabId);
+        updateDropdownChecks();
+        return;
+      }
+
+      const btn = e.target.closest('.dropdown-item');
+      if (!btn) return;
+
+      const menu = btn.getAttribute('data-menu');
+
+      if (btn.classList.contains('tab-row')) {
+        const id = menu;
+        if (!enabledTabs.includes(id)) {
+          enabledTabs.push(id);
+          StorageModule.saveEnabledTabs(enabledTabs);
+          renderTopNav();
+        }
+        activeTabId = id;
+        selectTab(id);
+        updateDropdownChecks();
+        dropdownMenu.classList.remove('open');
+        return;
+      }
+
+      dropdownMenu.classList.remove('open');
+
+      if (menu === 'profile') {
+        const store = loadProfileStore();
+        applyProfileStoreToForm(store);
+        updateProfileTitleText();
+
+        profileSaveBtn.disabled = true;
+        profileSaveBtn.textContent = '保存済み';
+        profileSaveBtn.style.cursor = 'not-allowed';
+
+        appEl.classList.add('profile-mode');
+
+      } else if (menu === 'ai-settings') {
+
+        openAiSettings();
+      } else if (menu === 'settings') {
+        addMessage('bot', "各種設定では、通知のタイミングや見た目、時間の扱い方を変えられるようにしていきたいなって考えてるよ。", {
+          timestamp: new Date().toISOString(),
+        });
+      } else if (menu === 'reset') {
+        // 🧹 すべて初期化
+        resetAllData();
+      }
+
+    });
+
+    // ===== プロフィール画面イベント =====
+    profileCloseBtn.addEventListener('click', () => {
+      appEl.classList.remove('profile-mode');
+    });
+
+    // 変更があったら保存ボタンを有効化する
+    function markProfileDirty() {
+      profileSaveBtn.disabled = false;
+      profileSaveBtn.textContent = '変更を保存';
+      profileSaveBtn.style.cursor = 'pointer';
+    }
+
+    [
+      profileNicknameInput, profileAgeInput, profileGenderInput, profileLifeRhythmSelect,
+      profileHobbiesTextarea, profileValuesTextarea, profileDislikesTextarea, profileFreeTextTextarea,
+      profileRequestsTextarea, aiRoleSelect, aiNameInput, aiMoodSelect, aiPersonaPresetSelect, aiFreeTextTextarea,
+      relMemoTextarea
+    ].forEach(el => {
+      el.addEventListener('input', markProfileDirty);
+      el.addEventListener('change', markProfileDirty);
+    });
+
+
+    // 保存ボタン押下
+    profileSaveBtn.addEventListener('click', () => {
+      const base = loadProfileStore();
+      const updated = collectProfileStoreFromForm(base);
+      saveProfileStore(updated);
+      updateProfileTitleText();
+      if (typeof updateAiNameUiTexts === "function") updateAiNameUiTexts();
+
+      // personaPresetを変えた時にAI設定側とも同期（ズレ防止）
+      currentPersonaId = updated.ai.personaPreset || currentPersonaId;
+      savePersonaToStorage();
+      aiSettingsCurrentLabel.textContent = getPersonaLabel(currentPersonaId);
+      if (typeof updateAiNameUiTexts === "function") updateAiNameUiTexts();
+
+      profileSaveBtn.disabled = true;
+      profileSaveBtn.textContent = '保存済み';
+      profileSaveBtn.style.cursor = 'not-allowed';
+
+      const now = new Date();
+      const msg = 'プロフィールを保存したよ。これからの会話で参考にしていくね。';
+      const node = addMessage('bot', msg, { timestamp: now.toISOString() });
+      lastBotMessageNode = node;
+    });
+
+
+
+    // ===== イベント =====
+    sendBtn.addEventListener('click', () => {
+      handleSend();
+    });
+
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+
+    inputEl.addEventListener('input', (e) => {
+      updateInputMood(e.target.value);
+    });
+
+    undoBtn.addEventListener('click', handleUndo);
+
+
+    // ===== 初回メッセージ（サーバ生成） =====
+    let bootGreetingInFlight = false;
+
+    async function generateBootGreeting(reason = 'startup') {
+      try {
+        if (bootGreetingInFlight) return;
+        bootGreetingInFlight = true;
+
+        // 既に会話があるなら不要
+        if (Array.isArray(conversation) && conversation.length > 0) return;
+
+        const profileStore = loadProfileStore();
+        // プロフィール未設定（オンボーディング中）の場合は生成しない
+        if (!profileStore || !profileStore.user || !profileStore.ai) return;
+        if (!(String(profileStore.user.nickname || '').trim()) || !(String(profileStore.ai.name || '').trim())) return;
+
+        const timeInfo = buildTimeInfoForAPI();
+
+        const payload = {
+          aiName: getAiDisplayName(),
+          userName: getUserDisplayName(),
+          personaPreset: profileStore?.ai?.personaPreset || currentPersonaId || 'gentle',
+          conversation: [], // 初回は空
+          timeInfo,
+          todayEvents: getTodayEventsForChat(),
+          todayDiary: getTodayDiaryForChat(),
+          yesterdayDiary: getYesterdayDiaryForChat(),
+          userProfile: profileStore,
+          isBootGreeting: true,
+          bootReason: reason,
+        };
+
+        // 返信待ち表示（簡易）
+        const waitTs = new Date().toISOString();
+        const waitNode = addMessage('bot', '…', { timestamp: waitTs });
+        lastBotMessageNode = waitNode;
+
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        const replyText = (data && data.reply) ? data.reply : "最初のメッセージ生成に失敗しちゃった…🙏";
+
+        // waitNode を置き換え（安全に）
+        try {
+          if (waitNode && waitNode.parentNode) waitNode.parentNode.removeChild(waitNode);
+        } catch {}
+
+        const botTimestamp = new Date().toISOString();
+        const botNode = addMessage('bot', replyText, { timestamp: botTimestamp });
+        lastBotMessageNode = botNode;
+
+        conversation.push({
+          role: 'assistant',
+          text: replyText,
+          imageBase64: null,
+          timestamp: botTimestamp,
+        });
+        saveConversationToStorage();
+      } catch (e) {
+        console.error('初回メッセージ生成エラー:', e);
+      } finally {
+        bootGreetingInFlight = false;
+      }
+    }
+
+
+    // ===== 起動時 =====
+    waitForModules(() => {
+      window.addEventListener('load', () => {
+        // ★ 最初に StorageModule 初期化（必須）
+        initializeEnabledTabs();
+        
+        if (!enabledTabs.includes(activeTabId)) {
+          activeTabId = enabledTabs[0];
+        }
+        renderTopNav();
+        selectTab(activeTabId);
+        updateDropdownChecks();
+
+        applyTimeTheme();
+      updateStatusBar();
+      setInterval(() => {
+        applyTimeTheme();
+        updateStatusBar();
+      }, 60000);
+
+      updateInputMood("");
+
+      const restored = StorageModule.loadConversation();
+      messagesEl.innerHTML = '';
+      lastMessageDateKey = null;
+
+      if (restored.length > 0) {
+        conversation = restored;
+        for (const entry of conversation) {
+          const sender = entry.role === 'assistant' ? 'bot' : 'user';
+          const opts = { timestamp: entry.timestamp };
+          if (entry.imageBase64) {
+            opts.type = 'image';
+            opts.imageSrc = entry.imageBase64;
+          }
+          const node = addMessage(sender, entry.text, opts);
+          if (sender === 'bot') lastBotMessageNode = node;
+          if (sender === 'user') lastUserMessageNode = node;
+        }
+      } else {
+        // 会話が空のとき：
+        // - オンボーディングが必要なら、先にオンボーディング（初回メッセージは「完了後」に生成）
+        // - 既にプロフィールが揃っているなら、サーバで初回メッセージを生成
+        if (!shouldShowOnboarding()) {
+          generateBootGreeting('startup');
+        }
+      }
+
+      // 起動時に現在モードを反映
+      aiSettingsCurrentLabel.textContent = getPersonaLabel(currentPersonaId);
+      if (typeof updateAiNameUiTexts === "function") updateAiNameUiTexts();
+      });
+    });
+    // ==== Onboarding ロジック ====
+const onboardEl = document.getElementById('onboard');
+const onboardSkipBtn = document.getElementById('onboardSkipBtn');
+const onboardBackBtn = document.getElementById('onboardBackBtn');
+const onboardNextBtn = document.getElementById('onboardNextBtn');
+const onboardProgress = document.getElementById('onboardProgress');
+
+const onbUserName = document.getElementById('onbUserName');
+const onbAiRole = document.getElementById('onbAiRole');
+const onbAiName = document.getElementById('onbAiName');
+const onbAiFreeText = document.getElementById('onbAiFreeText');
+const onbPersonaChoices = document.getElementById('onbPersonaChoices');
+
+let onboardStep = 1;
+const onboardTotal = 5;
+let onboardSelectedPersona = null; // gentle/cheerful/coach/honest
+
+function shouldShowOnboarding() {
+  const store = loadProfileStore();
+  const hasUser = (store?.user?.nickname || '').trim().length > 0;
+  const hasAiName = (store?.ai?.name || '').trim().length > 0;
+  // どっちか欠けてたら出す（最小）
+  return !(hasUser && hasAiName);
+}
+
+function openOnboarding() {
+  if (!onboardEl) return;
+  // 既存値を入れておく（途中からでも気持ちよく）
+  const store = loadProfileStore();
+  onbUserName.value = (store?.user?.nickname || '').trim();
+  onbAiRole.value = (store?.ai?.role || 'partner');
+  onbAiName.value = (store?.ai?.name || '').trim();
+  onbAiFreeText.value = (store?.ai?.freeText || '').trim();
+  onboardSelectedPersona = (store?.ai?.personaPreset || '').trim() || null;
+
+  // 選択見た目
+  syncPersonaChoiceUI();
+
+  onboardStep = 1;
+  renderOnboardingStep();
+  if (typeof updateAiNameUiTexts === "function") updateAiNameUiTexts();
+  onboardEl.style.display = 'flex';
+}
+
+function closeOnboarding() {
+  if (!onboardEl) return;
+  onboardEl.style.display = 'none';
+}
+
+function renderOnboardingStep() {
+  onboardEl.querySelectorAll('.onboard-step').forEach(el => {
+    const s = parseInt(el.getAttribute('data-step'), 10);
+    el.style.display = (s === onboardStep) ? 'block' : 'none';
+  });
+
+  onboardProgress.textContent = `${onboardStep} / ${onboardTotal}`;
+  onboardBackBtn.disabled = (onboardStep === 1);
+  onboardBackBtn.style.opacity = (onboardStep === 1) ? 0.5 : 1;
+
+      // 最後は「はじめる」に
+      onboardNextBtn.textContent = (onboardStep === onboardTotal) ? 'はじめる' : '次へ';
+    }
+
+    function syncPersonaChoiceUI() {
+      if (!onbPersonaChoices) return;
+      onbPersonaChoices.querySelectorAll('.onboard-choice').forEach(btn => {
+        const p = btn.getAttribute('data-persona');
+        btn.classList.toggle('selected', p === onboardSelectedPersona);
+      });
+    }
+
+    function validateCurrentStep() {
+      if (onboardStep === 1) {
+        return (onbUserName.value || '').trim().length > 0;
+      }
+      if (onboardStep === 3) {
+        return !!onboardSelectedPersona;
+      }
+      if (onboardStep === 4) {
+        return (onbAiName.value || '').trim().length > 0;
+      }
+      return true; // 2,5 は必須なし
+    }
+
+
+    function personaToMood(persona) {
+      switch (persona) {
+        case 'gentle':   return 'soft';
+        case 'cheerful': return 'energetic';
+        case 'coach':    return 'energetic';
+        case 'honest':   return 'calm';
+        default:         return 'auto';
+      }
+    }
+
+    function buildUpdatedProfileFromOnboarding() {
+      const store = loadProfileStore() || {};
+      store.user = store.user || {};
+      store.ai = store.ai || {};
+      store.rel = store.rel || {};
+
+      store.user.nickname = (onbUserName.value || '').trim();
+      store.ai.role = (onbAiRole.value || 'partner').trim();
+      store.ai.personaPreset = onboardSelectedPersona || store.ai.personaPreset || 'gentle';
+      store.ai.mood = personaToMood(store.ai.personaPreset);
+      store.ai.name = (onbAiName.value || '').trim();
+      store.ai.freeText = (onbAiFreeText.value || '').trim();
+
+      // ついでに関係性の初期値
+      if (!store.rel.firstMetDate) {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        store.rel.firstMetDate = `${y}-${m}-${d}`;
+      }
+      store.rel.lastActiveDate = store.rel.lastActiveDate || store.rel.firstMetDate || null;
+      store.rel.level = typeof store.rel.level === 'number' ? store.rel.level : 50;
+
+      return store;
+    }
+
+    // Persona choice click
+    if (onbPersonaChoices) {
+      onbPersonaChoices.addEventListener('click', (e) => {
+        const btn = e.target.closest('.onboard-choice');
+        if (!btn) return;
+        onboardSelectedPersona = btn.getAttribute('data-persona');
+        syncPersonaChoiceUI();
+      });
+    }
+
+    if (onboardSkipBtn) onboardSkipBtn.addEventListener('click', () => closeOnboarding());
+
+    if (onboardBackBtn) onboardBackBtn.addEventListener('click', () => {
+      if (onboardStep > 1) {
+        onboardStep--;
+        renderOnboardingStep();
+      }
+    });
+
+    if (onboardNextBtn) onboardNextBtn.addEventListener('click', () => {
+      if (!validateCurrentStep()) {
+        // 最小の案内（うるさくしない）
+        if (onboardStep === 1) alert('呼ばれたい名前を入れてね');
+        if (onboardStep === 3) alert('性格（雰囲気）を選んでね');
+        if (onboardStep === 4) alert('相手（AI）の名前を入れてね');
+        return;
+      }
+
+      if (onboardStep < onboardTotal) {
+        onboardStep++;
+        renderOnboardingStep();
+        return;
+      }
+
+      // 完了 → 保存＆反映
+      const updated = buildUpdatedProfileFromOnboarding();
+      saveProfileStore(updated);
+
+      
+    // ==== カレンダー（Calendar v0）DOM参照 ====
+    const calendarView = document.getElementById('calendarView');
+    const calendarCloseBtn = document.getElementById('calendarCloseBtn');
+    const calTodayPill = document.getElementById('calTodayPill');
+    const calSelectedPill = document.getElementById('calSelectedPill');
+    const calPrevBtn = document.getElementById('calPrevBtn');
+    const calNextBtn = document.getElementById('calNextBtn');
+    const calMonthLabel = document.getElementById('calMonthLabel');
+    const calDaysEl = document.getElementById('calDays');
+    const calPanelTitle = document.getElementById('calPanelTitle');
+    const calPanelSub = document.getElementById('calPanelSub');
+    const calAddBtn = document.getElementById('calAddBtn');
+    const calEventsList = document.getElementById('calEventsList');
+    const calDiaryBox = document.getElementById('calDiaryBox');
+    const calChatBox = document.getElementById('calChatBox');
+
+    // Sheet
+    const calSheet = document.getElementById('calSheet');
+    const calSheetTitle = document.getElementById('calSheetTitle');
+    const calSheetSub = document.getElementById('calSheetSub');
+    const calSheetCloseBtn = document.getElementById('calSheetCloseBtn');
+    const calSheetCancelBtn = document.getElementById('calSheetCancelBtn');
+    const calSheetSaveBtn = document.getElementById('calSheetSaveBtn');
+
+    const calTitleInput = document.getElementById('calTitleInput');
+    const calStartInput = document.getElementById('calStartInput');
+    const calEndInput = document.getElementById('calEndInput');
+    const calNoteInput = document.getElementById('calNoteInput');
+    const calReflectToggle = document.getElementById('calReflectToggle');
+
+
+    // プロフィール画面にも即反映（関数があるなら）
+      if (typeof applyProfileStoreToForm === 'function') applyProfileStoreToForm(updated);
+      if (typeof updateProfileTitleText === 'function') updateProfileTitleText();
+      if (typeof updateAiNameUiTexts === 'function') updateAiNameUiTexts();
+
+      // 入力欄 placeholder も更新したければ（あるなら）
+      if (typeof updateInputMood === 'function') updateInputMood('');
+
+      closeOnboarding();
+      // 初回メッセージ（オンボーディング完了後）
+      if (Array.isArray(conversation) && conversation.length === 0) {
+        generateBootGreeting('after_onboarding');
+      }
+
+    });
+
+    // 起動時に表示
+    try {
+      if (shouldShowOnboarding()) openOnboarding();
+    } catch {}
+
+    // ===== Compatibility Layer（旧関数→モジュール関数） =====
+    // saveConversationToStorage の互換性レイヤー
+    const saveConversationToStorage = () => StorageModule.saveConversation(conversation);
+    
+    // loadConversationFromStorage の互換性レイヤー
+    const loadConversationFromStorage = () => StorageModule.loadConversation();
+    
+    // ===== Compatibility Layer（旧関数→モジュール関数） =====
+    // グローバルスコープで古い関数がまだ参照されている場合の互換性を保つ
+    
+    // saveConversationToStorage の互換性レイヤー
+    if (typeof saveConversationToStorage === 'undefined') {
+      globalThis.saveConversationToStorage = () => StorageModule.saveConversation(conversation);
+    }
+    
+    // loadConversationFromStorage の互換性レイヤー
+    if (typeof loadConversationFromStorage === 'undefined') {
+      globalThis.loadConversationFromStorage = () => StorageModule.loadConversation();
+    }
+    
+    // buildTimeInfoForAPI の互換性レイヤー
+    if (typeof buildTimeInfoForAPI === 'undefined') {
+      globalThis.buildTimeInfoForAPI = () => HelperModule.buildTimeInfoForAPI();
+    }
+
+  </script>
+    
+
+</body>
+</html>
