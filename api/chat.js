@@ -1,6 +1,7 @@
 const OpenAI = require('openai');
 
 require('dotenv').config();
+const APP_KEY = process.env.COBEING_APP_KEY || '';
 
 let client = null;
 let OPENAI_AVAILABLE = false;
@@ -53,6 +54,25 @@ async function readJsonBody(req) {
   } catch {
     return {};
   }
+}
+
+function getRequestAppKey(req) {
+  const auth = req?.headers?.authorization || req?.headers?.Authorization;
+  if (auth && typeof auth === 'string') {
+    const trimmed = auth.trim();
+    const m = /^Bearer\s+(.+)$/i.exec(trimmed);
+    if (m) return m[1].trim();
+    return trimmed;
+  }
+  const headerKey = req?.headers?.['x-app-key'] || req?.headers?.['x-app-token'];
+  if (headerKey) return String(headerKey).trim();
+  return '';
+}
+
+function isAuthorized(req) {
+  if (!APP_KEY) return true;
+  const provided = getRequestAppKey(req);
+  return provided && provided === APP_KEY;
 }
 
 // =====================================
@@ -378,6 +398,9 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return sendJson(res, 405, { error: 'Method Not Allowed' });
+  }
+  if (!isAuthorized(req)) {
+    return sendJson(res, 401, { error: 'Unauthorized' });
   }
 
   try {
