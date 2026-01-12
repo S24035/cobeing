@@ -5,8 +5,30 @@
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 const OpenAI = require('openai');
+
+const APP_KEY = process.env.COBEING_APP_KEY || '';
+
+function getRequestAppKey(req) {
+  const auth = req?.headers?.authorization || req?.headers?.Authorization;
+  if (auth && typeof auth === 'string') {
+    const trimmed = auth.trim();
+    const m = /^Bearer\s+(.+)$/i.exec(trimmed);
+    if (m) return m[1].trim();
+    return trimmed;
+  }
+  const headerKey = req?.headers?.['x-app-key'] || req?.headers?.['x-app-token'];
+  if (headerKey) return String(headerKey).trim();
+  return '';
+}
+
+function isAuthorized(req) {
+  if (!APP_KEY) return true;
+  const provided = getRequestAppKey(req);
+  return provided && provided === APP_KEY;
+}
 
 const app = express();
 let client = null;
@@ -26,7 +48,11 @@ if (process.env.OPENAI_API_KEY) {
 
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
-app.use(express.static('public'));
+app.use('/api', (req, res, next) => {
+  if (isAuthorized(req)) return next();
+  return res.status(401).json({ error: 'Unauthorized' });
+});
+app.use(express.static(path.join(__dirname, 'public')));
 
 // =====================================
 //  性格プリセット（personaPreset）
@@ -423,6 +449,12 @@ app.post('/api/boot', async (req, res) => {
     console.log('[CoBeing][boot] profile type =', isProfileStoreLike(profile) ? 'ProfileStore' : 'legacy/v1 or none');
     console.log('[CoBeing][boot] profile.user.nickname =', profile?.user?.nickname || profile?.nickname || '(none)');
     console.log('[CoBeing][boot] todayEvents count =', Array.isArray(todayEvents) ? todayEvents.length : 0);
+
+    if (!OPENAI_AVAILABLE || !client) {
+      return res.json({
+        reply: '(MOCK) First greeting prepared. How are you feeling today?',
+      });
+    }
 
     const completion = await client.chat.completions.create({
       model: 'gpt-4o-mini',
