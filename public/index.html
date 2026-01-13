@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -41,6 +41,24 @@
       justify-content: center;
       align-items: center;
       height: var(--app-height);
+      touch-action: manipulation;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        justify-content: flex-start;
+        align-items: stretch;
+      }
+    }
+
+    @supports (-webkit-touch-callout: none) {
+      @media (max-width: 768px) {
+        .app input,
+        .app textarea,
+        .app select {
+          font-size: 16px;
+        }
+      }
     }
 
     .app {
