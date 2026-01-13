@@ -14,19 +14,39 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --app-height: 100vh;
+      --vvh: 100vh;
+      --keyboard: 0px;
+      --input-max: 80px;
+    }
+
+    @supports (height: 100dvh) {
+      :root {
+        --app-height: 100dvh;
+        --vvh: 100dvh;
+      }
+    }
+
+    html,
+    body {
+      height: var(--app-height);
+      overflow: hidden;
+    }
+
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #0f172a;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      height: var(--app-height);
     }
 
     .app {
       width: 100%;
       max-width: 480px;
-      height: 100vh;
+      height: var(--app-height);
       max-height: 820px;
       background: #ffffff;
       border-radius: 16px;
@@ -35,6 +55,7 @@
       flex-direction: column;
       overflow: hidden;
       position: relative;
+      padding-bottom: var(--keyboard);
     }
 
     /* 上部バー（タブ＋メニュー） */
@@ -169,6 +190,7 @@
       flex: 1;
       padding: 12px;
       overflow-y: auto;
+      min-height: 0;
       background: #f9fafb;
       transition: background 0.8s ease;
     }
@@ -327,7 +349,7 @@
 
     /* 入力欄 */
     .input-area {
-      padding: 8px;
+      padding: 8px 8px calc(8px + env(safe-area-inset-bottom)) 8px;
       border-top: none;
       background: #f9fafb;
       display: flex;
@@ -353,11 +375,12 @@
       border: 1px solid #d1d5db;
       padding: 8px 12px;
       font-size: 14px;
-      max-height: 80px;
+      max-height: var(--input-max);
       min-height: 36px;
       outline: none;
       transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
       background: #ffffffaa;
+      overflow-y: hidden;
     }
     .input-area textarea:focus {
       border-color: #6366f1;
@@ -2059,6 +2082,83 @@ position: absolute;
     const statusBarEl = document.getElementById('statusBar');
     const inputMoodHintEl = document.getElementById('inputMoodHint');
     const inputAreaEl = document.getElementById('inputArea');
+    const chatAreaEl = messagesEl ? messagesEl.parentElement : null;
+    const rootEl = document.documentElement;
+    const DEBUG_VIEWPORT = false;
+    let inputMaxHeight = 80;
+    let viewportRaf = 0;
+    let lastViewport = { layout: 0, visible: 0, keyboard: 0 };
+
+    function isNearBottom(el, threshold = 80) {
+      if (!el) return true;
+      const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+      return distance <= threshold;
+    }
+
+    function scrollToBottom(el) {
+      if (!el) return;
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function resizeInput() {
+      if (!inputEl) return;
+      const shouldStick = isNearBottom(chatAreaEl);
+      inputEl.style.height = 'auto';
+      const maxHeight = inputMaxHeight || 80;
+      const nextHeight = Math.min(inputEl.scrollHeight, maxHeight);
+      inputEl.style.height = `${nextHeight}px`;
+      inputEl.style.overflowY = inputEl.scrollHeight > maxHeight ? 'auto' : 'hidden';
+      if (shouldStick) scrollToBottom(chatAreaEl);
+    }
+
+    function updateViewportVars() {
+      const vv = window.visualViewport;
+      const layoutHeight = window.innerHeight || rootEl.clientHeight || 0;
+      const visibleHeight = vv ? vv.height : layoutHeight;
+      const offsetTop = vv ? vv.offsetTop : 0;
+      const keyboard = Math.max(0, Math.round(layoutHeight - visibleHeight - offsetTop));
+      const appHeight = Math.round(layoutHeight);
+      const visiblePx = Math.round(visibleHeight);
+
+      inputMaxHeight = Math.max(80, Math.round(visibleHeight * 0.35));
+
+      rootEl.style.setProperty('--app-height', `${appHeight}px`);
+      rootEl.style.setProperty('--vvh', `${visiblePx}px`);
+      rootEl.style.setProperty('--keyboard', `${keyboard}px`);
+      rootEl.style.setProperty('--input-max', `${inputMaxHeight}px`);
+
+      if (DEBUG_VIEWPORT) {
+        if (
+          lastViewport.layout !== appHeight ||
+          lastViewport.visible !== visiblePx ||
+          lastViewport.keyboard !== keyboard
+        ) {
+          lastViewport = { layout: appHeight, visible: visiblePx, keyboard };
+          console.log('[viewport]', lastViewport);
+        }
+      }
+    }
+
+    function scheduleViewportUpdate() {
+      if (viewportRaf) return;
+      viewportRaf = window.requestAnimationFrame(() => {
+        viewportRaf = 0;
+        updateViewportVars();
+        resizeInput();
+      });
+    }
+
+    window.addEventListener('resize', scheduleViewportUpdate);
+    window.addEventListener('orientationchange', scheduleViewportUpdate);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', scheduleViewportUpdate);
+      window.visualViewport.addEventListener('scroll', scheduleViewportUpdate);
+    }
+    if (inputEl) {
+      inputEl.addEventListener('focus', () => setTimeout(scheduleViewportUpdate, 50));
+      inputEl.addEventListener('blur', () => setTimeout(scheduleViewportUpdate, 50));
+    }
+    scheduleViewportUpdate();
         // v2フォームのDOM参照（追加）
     const profileAgeInput = document.getElementById('profileAge');
     const profileGenderInput = document.getElementById('profileGender');
@@ -3833,11 +3933,11 @@ const MAX_IMAGE_MB = 8;
         msgDiv.textContent = text;
       }
 
+      const shouldStick = isNearBottom(chatAreaEl);
       msgWrapper.appendChild(timeSpan);
       msgWrapper.appendChild(msgDiv);
       messagesEl.appendChild(msgWrapper);
-
-      messagesEl.parentElement.scrollTop = messagesEl.parentElement.scrollHeight;
+      if (shouldStick) scrollToBottom(chatAreaEl);
 
       return msgWrapper;
     }
@@ -4000,6 +4100,9 @@ const MAX_IMAGE_MB = 8;
       message.innerHTML = `<span class="replying">${html}</span>`;
       wrapper.appendChild(message);
 
+      const chatArea = document.querySelector('.chat-area');
+      const shouldStick = isNearBottom(chatArea);
+
       // messagesWrapper の末尾に追加
       const messagesWrapper = document.querySelector('.messages-wrapper');
       if (messagesWrapper && messagesWrapper.parentNode) {
@@ -4007,9 +4110,8 @@ const MAX_IMAGE_MB = 8;
       }
 
       // チャット欄を自動スクロール（下に移動）
-      const chatArea = document.querySelector('.chat-area');
-      if (chatArea) {
-        chatArea.scrollTop = chatArea.scrollHeight;
+      if (shouldStick) {
+        scrollToBottom(chatArea);
       }
 
       return wrapper;
@@ -4081,6 +4183,7 @@ const MAX_IMAGE_MB = 8;
 
       inputEl.value = "";
       updateInputMood("");
+      resizeInput();
 
       // ===== 返信中UI表示開始 =====
       // inflightToken を生成（複数送信対策）
@@ -4456,6 +4559,7 @@ const MAX_IMAGE_MB = 8;
 
     inputEl.addEventListener('input', (e) => {
       updateInputMood(e.target.value);
+      resizeInput();
     });
 
     undoBtn.addEventListener('click', handleUndo);
@@ -4550,6 +4654,7 @@ const MAX_IMAGE_MB = 8;
       }, 60000);
 
       updateInputMood("");
+      resizeInput();
       updateAppKeyStatus();
 
       const restored = loadConversationFromStorage();
