@@ -2130,10 +2130,9 @@ position: absolute;
       const layoutHeight = window.innerHeight || rootEl.clientHeight || 0;
       const visibleHeight = vv ? vv.height : layoutHeight;
       const offsetTop = vv ? vv.offsetTop : 0;
-      const activeEl = document.activeElement;
-      const isTextInput = activeEl
-        && /^(INPUT|TEXTAREA|SELECT)$/.test(activeEl.tagName);
-      if (!isTextInput || !baseLayoutHeight) {
+      const rawKeyboard = Math.max(0, Math.round(layoutHeight - visibleHeight - offsetTop));
+      const keyboardOpen = rawKeyboard > 0;
+      if (!keyboardOpen || !baseLayoutHeight) {
         baseLayoutHeight = layoutHeight;
       }
       const appHeight = Math.round(baseLayoutHeight || layoutHeight);
