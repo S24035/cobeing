@@ -2107,6 +2107,7 @@ position: absolute;
     const DEBUG_VIEWPORT = false;
     let inputMaxHeight = 80;
     let viewportRaf = 0;
+    let baseLayoutHeight = 0;
     let lastViewport = { layout: 0, visible: 0, keyboard: 0 };
 
     function isNearBottom(el, threshold = 80) {
@@ -2136,8 +2137,14 @@ position: absolute;
       const layoutHeight = window.innerHeight || rootEl.clientHeight || 0;
       const visibleHeight = vv ? vv.height : layoutHeight;
       const offsetTop = vv ? vv.offsetTop : 0;
-      const keyboard = Math.max(0, Math.round(layoutHeight - visibleHeight - offsetTop));
-      const appHeight = Math.round(layoutHeight);
+      const activeEl = document.activeElement;
+      const isTextInput = activeEl
+        && /^(INPUT|TEXTAREA|SELECT)$/.test(activeEl.tagName);
+      if (!isTextInput || !baseLayoutHeight) {
+        baseLayoutHeight = layoutHeight;
+      }
+      const appHeight = Math.round(baseLayoutHeight || layoutHeight);
+      const keyboard = Math.max(0, Math.round(appHeight - visibleHeight - offsetTop));
       const visiblePx = Math.round(visibleHeight);
 
       inputMaxHeight = Math.max(80, Math.round(visibleHeight * 0.35));
