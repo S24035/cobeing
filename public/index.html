@@ -18,6 +18,7 @@
       --app-height: 100vh;
       --vvh: 100vh;
       --keyboard: 0px;
+      --viewport-offset: 0px;
       --input-max: 80px;
     }
 
@@ -69,6 +70,7 @@
       overflow: hidden;
       position: relative;
       padding-bottom: var(--keyboard);
+      transform: translateY(var(--viewport-offset));
     }
 
     /* 上部バー（タブ＋メニュー） */
@@ -2130,13 +2132,14 @@ position: absolute;
       const layoutHeight = window.innerHeight || rootEl.clientHeight || 0;
       const visibleHeight = vv ? vv.height : layoutHeight;
       const offsetTop = vv ? vv.offsetTop : 0;
-      const rawKeyboard = Math.max(0, Math.round(layoutHeight - visibleHeight - offsetTop));
+      const viewportOffset = Math.max(0, Math.round(offsetTop));
+      const rawKeyboard = Math.max(0, Math.round(layoutHeight - visibleHeight));
       const keyboardOpen = rawKeyboard > 0;
       if (!keyboardOpen || !baseLayoutHeight) {
         baseLayoutHeight = layoutHeight;
       }
       const appHeight = Math.round(baseLayoutHeight || layoutHeight);
-      const keyboard = Math.max(0, Math.round(appHeight - visibleHeight - offsetTop));
+      const keyboard = Math.max(0, Math.round(appHeight - visibleHeight));
       const visiblePx = Math.round(visibleHeight);
 
       inputMaxHeight = Math.max(80, Math.round(visibleHeight * 0.35));
@@ -2144,6 +2147,7 @@ position: absolute;
       rootEl.style.setProperty('--app-height', `${appHeight}px`);
       rootEl.style.setProperty('--vvh', `${visiblePx}px`);
       rootEl.style.setProperty('--keyboard', `${keyboard}px`);
+      rootEl.style.setProperty('--viewport-offset', `${viewportOffset}px`);
       rootEl.style.setProperty('--input-max', `${inputMaxHeight}px`);
 
       if (DEBUG_VIEWPORT) {
