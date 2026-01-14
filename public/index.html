@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-app-version="v1.1.0+build-20260114-1">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -144,6 +144,14 @@
     .status-label-main { font-weight: 600; }
     .status-label-sub { opacity: 0.9; }
     .status-spacer { flex: 1; }
+    .status-version {
+      font-size: 10px;
+      opacity: 0.85;
+      background: rgba(255,255,255,0.12);
+      padding: 2px 6px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
 
     /* ドロップダウンメニュー */
     .dropdown-menu {
@@ -1615,6 +1623,7 @@ position: absolute;
       <span class="status-label-main">🕊 CoBeing</span>
       <span class="status-spacer"></span>
       <span class="status-label-sub">---</span>
+      <span class="status-version" id="statusVersion"></span>
     </div>
 
     <!-- チャットエリア -->
@@ -2095,6 +2104,7 @@ position: absolute;
     const dropdownMenu = document.getElementById('dropdownMenu');
     const topNav = document.getElementById('topNav');
     const statusBarEl = document.getElementById('statusBar');
+    const statusVersionEl = document.getElementById('statusVersion');
     const inputMoodHintEl = document.getElementById('inputMoodHint');
     const inputAreaEl = document.getElementById('inputArea');
     const chatAreaEl = messagesEl ? messagesEl.parentElement : null;
@@ -2107,6 +2117,9 @@ position: absolute;
     let baseLayoutHeight = 0;
     let baseVisibleHeight = 0;
     let lastViewport = { layout: 0, visible: 0, keyboard: 0 };
+
+    const APP_VERSION = document.documentElement.getAttribute('data-app-version') || '';
+    if (statusVersionEl) statusVersionEl.textContent = APP_VERSION;
 
     function isNearBottom(el, threshold = 80) {
       if (!el) return true;
