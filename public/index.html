@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-app-version="v1.1.0+build-20260114-2">
+<html lang="ja" data-app-version="v1.1.0+build-20260114-3">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -49,6 +49,10 @@
 
     @supports (-webkit-touch-callout: none) {
       @media (max-width: 768px) {
+        body {
+          align-items: flex-end;
+        }
+
         input,
         textarea,
         select {
@@ -144,7 +148,7 @@
     /* ステータスバー */
     .status-bar {
       font-size: 11px;
-      padding: 4px 10px 6px;
+      padding: calc(4px + env(safe-area-inset-top)) 10px 6px;
       background: rgba(15,23,42,0.85);
       color: #e5e7eb;
       display: flex;
