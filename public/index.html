@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-app-version="v1.1.0+build-20260114-1">
+<html lang="ja" data-app-version="v1.1.0+build-20260114-2">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -81,6 +81,7 @@
       overflow: hidden;
       position: relative;
       padding-bottom: var(--keyboard);
+      padding-bottom: max(0px, calc(var(--keyboard) - env(safe-area-inset-bottom)));
       transform: translateY(var(--viewport-offset));
     }
 
@@ -2158,6 +2159,7 @@ position: absolute;
       const vv = window.visualViewport;
       const layoutHeight = window.innerHeight || rootEl.clientHeight || 0;
       const visibleHeight = vv ? vv.height : layoutHeight;
+      const vvOffsetTop = vv ? (vv.offsetTop || 0) : 0;
       if (LOCK_VIEWPORT) {
         if (!baseLayoutHeight || layoutHeight > baseLayoutHeight) baseLayoutHeight = layoutHeight;
         const appHeight = Math.round(baseLayoutHeight);
@@ -2173,22 +2175,29 @@ position: absolute;
       const activeEl = document.activeElement;
       const isTextInput = activeEl
         && /^(INPUT|TEXTAREA|SELECT)$/.test(activeEl.tagName);
+      const overlayOpen = rootEl.classList.contains('onboard-open')
+        || rootEl.classList.contains('app-key-open');
+      const suppressKeyboard = overlayOpen && isTextInput;
       const layoutDiff = Math.max(0, Math.round(layoutHeight - visibleHeight));
       const baselineVisual = baseVisibleHeight || layoutHeight;
       const visualDiff = Math.max(0, Math.round(baselineVisual - visibleHeight));
-      const keyboardOpen = isTextInput
+      const keyboardOpen = !suppressKeyboard
+        && isTextInput
         && (visualDiff > KEYBOARD_OPEN_THRESHOLD || layoutDiff > KEYBOARD_OPEN_THRESHOLD);
       if (!keyboardOpen) {
-        baseLayoutHeight = layoutHeight;
-        baseVisibleHeight = visibleHeight;
+        if (!suppressKeyboard) {
+          baseLayoutHeight = layoutHeight;
+          baseVisibleHeight = visibleHeight;
+        }
       } else {
         if (!baseLayoutHeight || layoutHeight > baseLayoutHeight) baseLayoutHeight = layoutHeight;
         if (!baseVisibleHeight) baseVisibleHeight = layoutHeight + layoutDiff;
       }
       const appHeight = Math.round(baseLayoutHeight || layoutHeight);
-      const keyboard = keyboardOpen
-        ? Math.max(0, Math.round((baseVisibleHeight || layoutHeight) - visibleHeight))
-        : 0;
+      const keyboardArea = vv
+        ? Math.round((baseLayoutHeight || layoutHeight) - (visibleHeight + vvOffsetTop))
+        : Math.round((baseVisibleHeight || layoutHeight) - visibleHeight);
+      const keyboard = keyboardOpen ? Math.max(0, keyboardArea) : 0;
       const visiblePx = Math.round(visibleHeight);
 
       inputMaxHeight = Math.max(80, Math.round(visibleHeight * 0.35));
@@ -2489,6 +2498,7 @@ const PROFILE_KEY_V2 = 'cobeing_profile_v2';
     function openAppKeyPanel(reason) {
       if (!appKeyPanel) return;
       appKeyPanel.style.display = 'flex';
+      rootEl.classList.add('app-key-open');
       if (appKeyInput) {
         appKeyInput.type = 'password';
         appKeyInput.value = loadAppKey();
@@ -2497,11 +2507,14 @@ const PROFILE_KEY_V2 = 'cobeing_profile_v2';
       if (appKeyToggleBtn) appKeyToggleBtn.textContent = '表示';
       if (appKeyRemember) appKeyRemember.checked = loadAppKeyRemember();
       updateAppKeyStatus(reason);
+      scheduleViewportUpdate();
     }
 
     function closeAppKeyPanel() {
       if (!appKeyPanel) return;
       appKeyPanel.style.display = 'none';
+      rootEl.classList.remove('app-key-open');
+      scheduleViewportUpdate();
     }
 
     function getApiHeadersOrPrompt() {
@@ -4837,11 +4850,15 @@ function openOnboarding() {
   renderOnboardingStep();
   if (typeof updateAiNameUiTexts === "function") updateAiNameUiTexts();
   onboardEl.style.display = 'flex';
+  rootEl.classList.add('onboard-open');
+  scheduleViewportUpdate();
 }
 
 function closeOnboarding() {
   if (!onboardEl) return;
   onboardEl.style.display = 'none';
+  rootEl.classList.remove('onboard-open');
+  scheduleViewportUpdate();
 }
 
 function renderOnboardingStep() {
