@@ -57,6 +57,17 @@
       }
     }
 
+    @supports (-webkit-touch-callout: none) {
+      .viewport-locked body {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
+      }
+    }
+
     .app {
       width: 100%;
       max-width: 480px;
@@ -2240,6 +2251,17 @@ position: absolute;
         lastTouchEnd = now;
       }, { passive: false });
       document.addEventListener('dblclick', preventZoom);
+    }
+
+    if (IS_IOS && LOCK_VIEWPORT) {
+      document.documentElement.classList.add('viewport-locked');
+      const lockScroll = () => {
+        if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
+        window.scrollTo(0, 0);
+      };
+      window.addEventListener('scroll', lockScroll, { passive: true });
+      document.addEventListener('focusin', () => setTimeout(lockScroll, 0));
+      document.addEventListener('focusout', () => setTimeout(lockScroll, 0));
     }
         // v2フォームのDOM参照（追加）
     const profileAgeInput = document.getElementById('profileAge');
