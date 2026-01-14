@@ -2100,6 +2100,7 @@ position: absolute;
     const chatAreaEl = messagesEl ? messagesEl.parentElement : null;
     const rootEl = document.documentElement;
     const DEBUG_VIEWPORT = false;
+    const LOCK_VIEWPORT = true;
     let inputMaxHeight = 80;
     let viewportRaf = 0;
     const KEYBOARD_OPEN_THRESHOLD = 120;
@@ -2134,6 +2135,18 @@ position: absolute;
       const layoutHeight = window.innerHeight || rootEl.clientHeight || 0;
       const visibleHeight = vv ? vv.height : layoutHeight;
       const offsetTop = vv ? vv.offsetTop : 0;
+      if (LOCK_VIEWPORT) {
+        if (!baseLayoutHeight) baseLayoutHeight = layoutHeight;
+        const appHeight = Math.round(baseLayoutHeight);
+        const visiblePx = Math.round(layoutHeight);
+        inputMaxHeight = Math.max(80, Math.round(layoutHeight * 0.35));
+        rootEl.style.setProperty('--app-height', `${appHeight}px`);
+        rootEl.style.setProperty('--vvh', `${visiblePx}px`);
+        rootEl.style.setProperty('--keyboard', '0px');
+        rootEl.style.setProperty('--viewport-offset', '0px');
+        rootEl.style.setProperty('--input-max', `${inputMaxHeight}px`);
+        return;
+      }
       const activeEl = document.activeElement;
       const isTextInput = activeEl
         && /^(INPUT|TEXTAREA|SELECT)$/.test(activeEl.tagName);
