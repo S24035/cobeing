@@ -2121,7 +2121,7 @@ position: absolute;
     const chatAreaEl = messagesEl ? messagesEl.parentElement : null;
     const rootEl = document.documentElement;
     const DEBUG_VIEWPORT = false;
-    const LOCK_VIEWPORT = true;
+    const LOCK_VIEWPORT = false;
     let inputMaxHeight = 80;
     let viewportRaf = 0;
     const KEYBOARD_OPEN_THRESHOLD = 120;
@@ -2158,9 +2158,8 @@ position: absolute;
       const vv = window.visualViewport;
       const layoutHeight = window.innerHeight || rootEl.clientHeight || 0;
       const visibleHeight = vv ? vv.height : layoutHeight;
-      const offsetTop = vv ? vv.offsetTop : 0;
       if (LOCK_VIEWPORT) {
-        if (!baseLayoutHeight) baseLayoutHeight = layoutHeight;
+        if (!baseLayoutHeight || layoutHeight > baseLayoutHeight) baseLayoutHeight = layoutHeight;
         const appHeight = Math.round(baseLayoutHeight);
         const visiblePx = Math.round(layoutHeight);
         inputMaxHeight = Math.max(80, Math.round(layoutHeight * 0.35));
@@ -2175,16 +2174,21 @@ position: absolute;
       const isTextInput = activeEl
         && /^(INPUT|TEXTAREA|SELECT)$/.test(activeEl.tagName);
       const layoutDiff = Math.max(0, Math.round(layoutHeight - visibleHeight));
-      const keyboardOpen = isTextInput && layoutDiff > KEYBOARD_OPEN_THRESHOLD;
-      if (!keyboardOpen || !baseLayoutHeight || !baseVisibleHeight) {
+      const baselineVisual = baseVisibleHeight || layoutHeight;
+      const visualDiff = Math.max(0, Math.round(baselineVisual - visibleHeight));
+      const keyboardOpen = isTextInput
+        && (visualDiff > KEYBOARD_OPEN_THRESHOLD || layoutDiff > KEYBOARD_OPEN_THRESHOLD);
+      if (!keyboardOpen) {
         baseLayoutHeight = layoutHeight;
         baseVisibleHeight = visibleHeight;
+      } else {
+        if (!baseLayoutHeight || layoutHeight > baseLayoutHeight) baseLayoutHeight = layoutHeight;
+        if (!baseVisibleHeight) baseVisibleHeight = layoutHeight + layoutDiff;
       }
       const appHeight = Math.round(baseLayoutHeight || layoutHeight);
       const keyboard = keyboardOpen
-        ? Math.max(0, Math.round((baseVisibleHeight || visibleHeight) - visibleHeight))
+        ? Math.max(0, Math.round((baseVisibleHeight || layoutHeight) - visibleHeight))
         : 0;
-      const viewportOffset = keyboardOpen ? Math.max(0, Math.round(offsetTop)) : 0;
       const visiblePx = Math.round(visibleHeight);
 
       inputMaxHeight = Math.max(80, Math.round(visibleHeight * 0.35));
@@ -2192,7 +2196,7 @@ position: absolute;
       rootEl.style.setProperty('--app-height', `${appHeight}px`);
       rootEl.style.setProperty('--vvh', `${visiblePx}px`);
       rootEl.style.setProperty('--keyboard', `${keyboard}px`);
-      rootEl.style.setProperty('--viewport-offset', `${viewportOffset}px`);
+      rootEl.style.setProperty('--viewport-offset', '0px');
       rootEl.style.setProperty('--input-max', `${inputMaxHeight}px`);
 
       if (DEBUG_VIEWPORT) {
@@ -2253,7 +2257,7 @@ position: absolute;
       document.addEventListener('dblclick', preventZoom);
     }
 
-    if (IS_IOS && LOCK_VIEWPORT) {
+    if (IS_IOS) {
       document.documentElement.classList.add('viewport-locked');
       const lockScroll = () => {
         if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
