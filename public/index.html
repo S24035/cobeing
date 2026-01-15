@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-app-version="v1.1.0+build-20260114-4">
+<html lang="ja" data-app-version="v1.1.0+build-20260114-5">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -2388,6 +2388,7 @@ const PROFILE_KEY_V2 = 'cobeing_profile_v2';
     const APP_KEY_STORAGE = 'cobeing_app_key_v1';
     const APP_KEY_REMEMBER = 'cobeing_app_key_remember_v1';
     let appKeyMemory = '';
+    let pendingAppKeyAction = null;
 
     // ★ 初期化でまとめて消すキー（必要に応じて増やしてOK）
     const RESET_STORAGE_KEYS = [
@@ -2438,10 +2439,13 @@ const PROFILE_KEY_V2 = 'cobeing_profile_v2';
     // ===== App key for API =====
     function loadAppKeyRemember() {
       try {
-        if (localStorage.getItem(APP_KEY_REMEMBER) === '1') return true;
-        return !!(localStorage.getItem(APP_KEY_STORAGE) || '').trim();
+        const pref = localStorage.getItem(APP_KEY_REMEMBER);
+        if (pref === '1') return true;
+        if (pref === '0') return false;
+        if ((localStorage.getItem(APP_KEY_STORAGE) || '').trim()) return true;
+        return true;
       } catch {
-        return false;
+        return true;
       }
     }
 
@@ -2476,7 +2480,7 @@ const PROFILE_KEY_V2 = 'cobeing_profile_v2';
           localStorage.setItem(APP_KEY_REMEMBER, '1');
         } else {
           localStorage.removeItem(APP_KEY_STORAGE);
-          localStorage.removeItem(APP_KEY_REMEMBER);
+          localStorage.setItem(APP_KEY_REMEMBER, '0');
         }
       } catch {}
     }
@@ -2524,6 +2528,24 @@ const PROFILE_KEY_V2 = 'cobeing_profile_v2';
       appKeyPanel.style.display = 'none';
       rootEl.classList.remove('app-key-open');
       scheduleViewportUpdate();
+    }
+
+    function ensureAppKeyThen(action) {
+      if (loadAppKey()) {
+        pendingAppKeyAction = null;
+        action();
+        return true;
+      }
+      pendingAppKeyAction = action;
+      openAppKeyPanel('APIキーが必要です');
+      return false;
+    }
+
+    function resumePendingAppKeyAction() {
+      if (!pendingAppKeyAction) return;
+      const next = pendingAppKeyAction;
+      pendingAppKeyAction = null;
+      next();
     }
 
     function getApiHeadersOrPrompt() {
@@ -4608,6 +4630,7 @@ const MAX_IMAGE_MB = 8;
         saveAppKey(key, remember);
         updateAppKeyStatus('設定済み');
         closeAppKeyPanel();
+        resumePendingAppKeyAction();
       });
     }
     if (appKeyClearBtn) {
@@ -4787,6 +4810,7 @@ const MAX_IMAGE_MB = 8;
       resizeInput();
       updateAppKeyStatus();
 
+      const needsOnboarding = shouldShowOnboarding();
       const restored = loadConversationFromStorage();
       messagesEl.innerHTML = '';
       lastMessageDateKey = null;
@@ -4804,13 +4828,21 @@ const MAX_IMAGE_MB = 8;
           if (sender === 'bot') lastBotMessageNode = node;
           if (sender === 'user') lastUserMessageNode = node;
         }
+        if (needsOnboarding) {
+          openOnboarding();
+        }
       } else {
         // 会話が空のとき：
         // - オンボーディングが必要なら、先にオンボーディング（初回メッセージは「完了後」に生成）
         // - 既にプロフィールが揃っているなら、サーバで初回メッセージを生成
-        if (!shouldShowOnboarding()) {
-          generateBootGreeting('startup');
-        }
+        const startFirstFlow = () => {
+          if (needsOnboarding) {
+            openOnboarding();
+          } else {
+            generateBootGreeting('startup');
+          }
+        };
+        ensureAppKeyThen(startFirstFlow);
       }
 
       // 起動時に現在モードを反映
@@ -5030,9 +5062,7 @@ function renderOnboardingStep() {
     });
 
     // 起動時に表示
-    try {
-      if (shouldShowOnboarding()) openOnboarding();
-    } catch {}
+    try {} catch {}
 
 
   </script>
