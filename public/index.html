@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-app-version="v1.1.0+build-20260117-4">
+<html lang="ja" data-app-version="v1.1.0+build-20260117-5">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -4543,6 +4543,12 @@ const MAX_IMAGE_MB = 8;
     // ===== メニュー =====
     menuToggle.addEventListener('click', () => {
       dropdownMenu.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!dropdownMenu.classList.contains('open')) return;
+      if (dropdownMenu.contains(e.target) || menuToggle.contains(e.target)) return;
+      dropdownMenu.classList.remove('open');
     });
 
     dropdownMenu.addEventListener('click', (e) => {
