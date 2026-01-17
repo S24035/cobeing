@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-app-version="v1.1.0+build-20260117-2">
+<html lang="ja" data-app-version="v1.1.0+build-20260117-3">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -111,13 +111,14 @@
       flex-wrap: nowrap;
       overflow-x: auto;
       flex: 1;
+      -webkit-overflow-scrolling: touch;
     }
 
     .nav-btn {
       border: none;
       border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 18px;
+      padding: 6px 12px;
+      font-size: 14px;
       background: #374151;
       color: #e5e7eb;
       cursor: pointer;
@@ -127,6 +128,17 @@
       justify-content: center;
       min-width: 40px;
       min-height: 40px;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .nav-btn .nav-emoji {
+      font-size: 18px;
+      line-height: 1;
+    }
+    .nav-btn .nav-label {
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 600;
     }
 
     .nav-btn.active {
@@ -2687,7 +2699,14 @@ const MAX_IMAGE_MB = 8;
         if (id === activeTabId) btn.classList.add('active');
         btn.setAttribute('data-tab', id);
         btn.title = tab.title;
-        btn.textContent = tab.icon;
+        const emojiSpan = document.createElement('span');
+        emojiSpan.className = 'nav-emoji';
+        emojiSpan.textContent = tab.icon;
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'nav-label';
+        labelSpan.textContent = tab.title;
+        btn.appendChild(emojiSpan);
+        btn.appendChild(labelSpan);
         btn.addEventListener('click', () => selectTab(id));
         topNav.appendChild(btn);
       });
