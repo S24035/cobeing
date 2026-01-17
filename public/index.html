@@ -4704,7 +4704,7 @@ const MAX_IMAGE_MB = 8;
     });
 
     inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && !IS_IOS) {
         e.preventDefault();
         handleSend();
       }
