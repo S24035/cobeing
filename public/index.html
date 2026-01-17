@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-app-version="v1.1.0+build-20260117-7">
+<html lang="ja" data-app-version="v1.1.0+build-20260117-8">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1407,14 +1407,14 @@ position: absolute;
     }
     .cal-row{
       display:flex;
-      gap:8px;
-      flex-wrap: wrap;
+      gap:6px;
+      align-items:flex-end;
     }
-    .cal-row > .cal-field{ flex:1 1 160px; }
-    @media (max-width: 480px) {
-      .cal-row{
-        flex-direction: column;
-      }
+    .cal-row > .cal-field{ flex:1 1 0; min-width:0; }
+    .cal-row .cal-input[type="time"]{
+      padding:8px 8px;
+      font-size:12px;
+      min-width:0;
     }
     .cal-toggle{
       display:flex;
