@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-app-version="v1.1.0+build-20260117-3">
+<html lang="ja" data-app-version="v1.1.0+build-20260117-4">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1619,14 +1619,6 @@ position: absolute;
         <span class="dropdown-label">📅 カレンダー</span>
         <span class="dropdown-check" data-check-for="schedule">✔</span>
       </button>
-      <button class="dropdown-item tab-row" data-menu="menu">
-        <span class="dropdown-label">🍚 献立</span>
-        <span class="dropdown-check" data-check-for="menu">✔</span>
-      </button>
-      <button class="dropdown-item tab-row" data-menu="money">
-        <span class="dropdown-label">💰 家計</span>
-        <span class="dropdown-check" data-check-for="money">✔</span>
-      </button>
 
       <div class="dropdown-divider"></div>
 
@@ -2664,8 +2656,6 @@ const MAX_IMAGE_MB = 8;
       { id: 'tasks', icon: '📋', title: 'タスク' },
       { id: 'diary', icon: '✏',  title: '日記' },
       { id: 'schedule', icon: '📅', title: 'カレンダー' },
-      { id: 'menu', icon: '🍚', title: '献立' },
-      { id: 'money', icon: '💰', title: '家計' },
     ];
 
     function loadEnabledTabs() {
