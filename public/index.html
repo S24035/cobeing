@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-app-version="v1.1.0+build-20260117-6">
+<html lang="ja" data-app-version="v1.1.0+build-20260117-7">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -1408,8 +1408,14 @@ position: absolute;
     .cal-row{
       display:flex;
       gap:8px;
+      flex-wrap: wrap;
     }
-    .cal-row > .cal-field{ flex:1; }
+    .cal-row > .cal-field{ flex:1 1 160px; }
+    @media (max-width: 480px) {
+      .cal-row{
+        flex-direction: column;
+      }
+    }
     .cal-toggle{
       display:flex;
       align-items:center;
@@ -1963,11 +1969,11 @@ position: absolute;
           <div class="cal-row">
             <div class="cal-field">
               <label class="cal-label" for="calStartInput">開始（任意）</label>
-              <input class="cal-input" id="calStartInput" type="time" />
+              <input class="cal-input" id="calStartInput" type="time" step="300" />
             </div>
             <div class="cal-field">
               <label class="cal-label" for="calEndInput">終了（任意）</label>
-              <input class="cal-input" id="calEndInput" type="time" />
+              <input class="cal-input" id="calEndInput" type="time" step="300" />
             </div>
           </div>
 
