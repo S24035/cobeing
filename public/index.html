@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-app-version="v1.1.0+build-20260117-1">
+<html lang="ja" data-app-version="v1.1.0+build-20260117-2">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
@@ -415,7 +415,7 @@
     .input-area textarea {
       flex: 1;
       resize: none;
-      border-radius: 18px;
+      border-radius: 999px;
       border: 1px solid #d1d5db;
       padding: 8px 12px;
       font-size: 14px;
@@ -425,6 +425,10 @@
       transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
       background: #ffffffaa;
       overflow-y: hidden;
+    }
+    .input-area.is-multiline textarea {
+      border-radius: 16px;
+      padding: 10px 12px;
     }
     .input-area textarea:focus {
       border-color: #6366f1;
@@ -2156,6 +2160,17 @@ position: absolute;
     function resizeInput() {
       if (!inputEl) return;
       const shouldStick = isNearBottom(chatAreaEl);
+      inputEl.style.height = 'auto';
+      if (inputAreaEl) {
+        const styles = window.getComputedStyle(inputEl);
+        const fontSize = parseFloat(styles.fontSize) || 14;
+        const lineHeight = parseFloat(styles.lineHeight) || Math.round(fontSize * 1.4);
+        const padTop = parseFloat(styles.paddingTop) || 0;
+        const padBottom = parseFloat(styles.paddingBottom) || 0;
+        const singleLineHeight = lineHeight + padTop + padBottom;
+        const isMultiline = inputEl.scrollHeight > singleLineHeight + 1;
+        inputAreaEl.classList.toggle('is-multiline', isMultiline);
+      }
       inputEl.style.height = 'auto';
       const maxHeight = inputMaxHeight || 80;
       const nextHeight = Math.min(inputEl.scrollHeight, maxHeight);
