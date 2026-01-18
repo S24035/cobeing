@@ -1076,6 +1076,370 @@ position: absolute;
       box-shadow:0 4px 10px rgba(79,70,229,0.25);
     }
 
+    /* ==== タスク画面（Tasks v1） ==== */
+    .tasks-view{
+      flex:1;
+      padding: 12px 14px 10px;
+      background:#f9fafb;
+      display:none;
+      flex-direction:column;
+      overflow-y:auto;
+      position:relative;
+    }
+
+    .app.tasks-mode .chat-area,
+    .app.tasks-mode .input-mood-hint,
+    .app.tasks-mode .input-area{
+      display:none;
+    }
+    .app.tasks-mode .profile-view{ display:none; }
+    .app.tasks-mode .diary-view{ display:none; }
+    .app.tasks-mode .calendar-view{ display:none; }
+    .app.tasks-mode .tasks-view{ display:flex; }
+
+    .tasks-header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .tasks-title{
+      font-size:16px;
+      font-weight:800;
+      color:#111827;
+    }
+    .tasks-subtitle{
+      font-size:11px;
+      color:#6b7280;
+      margin-top:3px;
+    }
+    .tasks-close-btn{
+      border:none;
+      background:#e5e7eb;
+      color:#111827;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      cursor:pointer;
+    }
+
+    .tasks-subnav{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .tasks-tab{
+      border:1px solid #e5e7eb;
+      background:#ffffff;
+      color:#111827;
+      border-radius:999px;
+      padding:6px 12px;
+      font-size:12px;
+      cursor:pointer;
+    }
+    .tasks-tab.active{
+      border-color:#6366f1;
+      background:#eef2ff;
+      box-shadow:0 0 0 1px rgba(129,140,248,0.35);
+    }
+
+    .tasks-panel{ display:none; }
+    .tasks-panel.active{ display:block; }
+
+    .tasks-card{
+      background:#ffffff;
+      border-radius:14px;
+      padding:10px;
+      box-shadow:0 2px 6px rgba(15,23,42,0.06);
+      border:1px solid #e5e7eb;
+      margin-bottom:10px;
+    }
+    .tasks-card-title{
+      font-size:13px;
+      font-weight:700;
+      color:#111827;
+      margin-bottom:8px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .tasks-card-sub{
+      font-size:11px;
+      color:#6b7280;
+      font-weight:500;
+    }
+
+    .task-field{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      margin-bottom:8px;
+    }
+    .task-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .task-input,
+    .task-select,
+    .task-textarea{
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      padding:8px 10px;
+      font-size:13px;
+      outline:none;
+      background:#f9fafb;
+      width:100%;
+    }
+    .task-input:focus,
+    .task-select:focus,
+    .task-textarea:focus{
+      border-color:#6366f1;
+      box-shadow:0 0 0 1px rgba(129,140,248,0.35);
+      background:#eef2ff;
+    }
+    .task-label{
+      font-size:11px;
+      color:#6b7280;
+    }
+
+    .task-btn{
+      border:none;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:12px;
+      cursor:pointer;
+      background:#e5e7eb;
+      color:#111827;
+    }
+    .task-btn.primary{
+      background:#6366f1;
+      color:#fff;
+      box-shadow:0 4px 10px rgba(79,70,229,0.25);
+    }
+    .task-btn.danger{
+      background:#fee2e2;
+      color:#991b1b;
+    }
+    .task-btn[disabled]{
+      background:#e5e7eb;
+      color:#6b7280;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
+
+    .task-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .task-item{
+      border:1px solid #e5e7eb;
+      background:#f9fafb;
+      border-radius:14px;
+      padding:10px;
+    }
+    .task-item-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .task-title{
+      font-size:13px;
+      font-weight:600;
+      color:#111827;
+    }
+    .task-meta{
+      margin-top:4px;
+      font-size:11px;
+      color:#6b7280;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .task-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      font-size:10px;
+      padding:2px 8px;
+      border-radius:999px;
+      background:#eef2ff;
+      border:1px solid #c7d2fe;
+      color:#1f2937;
+      white-space:nowrap;
+    }
+    .task-pill.priority-5{ background:#fee2e2; border-color:#fecaca; color:#7f1d1d; }
+    .task-pill.priority-4{ background:#ffedd5; border-color:#fed7aa; color:#9a3412; }
+
+    .task-status-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:8px;
+    }
+    .task-status-btn{
+      border:1px solid #d1d5db;
+      background:#ffffff;
+      border-radius:999px;
+      padding:4px 8px;
+      font-size:11px;
+      cursor:pointer;
+    }
+    .task-status-btn.active{
+      border-color:#6366f1;
+      background:#eef2ff;
+      box-shadow:0 0 0 1px rgba(129,140,248,0.35);
+    }
+
+    .task-actions{
+      display:flex;
+      gap:6px;
+      margin-top:8px;
+      flex-wrap:wrap;
+    }
+
+    .task-empty{
+      font-size:12px;
+      color:#6b7280;
+      text-align:left;
+      padding:6px 0;
+    }
+
+    .task-filter-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:flex-end;
+      margin-bottom:8px;
+    }
+
+    .task-status-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:8px;
+    }
+    .task-status-card{
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:8px;
+      background:#f9fafb;
+    }
+    .task-status-label{
+      font-size:11px;
+      color:#6b7280;
+    }
+    .task-status-count{
+      font-size:16px;
+      font-weight:700;
+      color:#111827;
+      margin-top:2px;
+    }
+
+    .template-card{
+      border:1px solid #e5e7eb;
+      border-radius:14px;
+      padding:10px;
+      background:#f9fafb;
+      margin-bottom:10px;
+    }
+    .template-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .template-title{
+      font-size:13px;
+      font-weight:700;
+      color:#111827;
+    }
+    .template-items{
+      margin-top:8px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .template-item{
+      background:#ffffff;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      padding:8px;
+      font-size:12px;
+      color:#111827;
+    }
+    .template-item-meta{
+      margin-top:4px;
+      font-size:11px;
+      color:#6b7280;
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+    .template-actions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+
+    .task-sheet{
+      position:absolute;
+      inset:0;
+      background: rgba(15,23,42,0.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:900;
+    }
+    .task-sheet.open{ display:flex; }
+    .task-sheet-card{
+      width:min(560px, 100%);
+      background:#fff;
+      border-radius:16px;
+      padding:14px;
+      box-shadow: 0 14px 40px rgba(15,23,42,0.25);
+      border:1px solid #e5e7eb;
+      max-height: 90vh;
+      overflow-y:auto;
+    }
+    .task-sheet-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+    .task-sheet-title{
+      font-size:15px;
+      font-weight:800;
+      color:#111827;
+    }
+    .task-sheet-sub{
+      font-size:11px;
+      color:#6b7280;
+      margin-top:3px;
+    }
+    .task-sheet-footer{
+      margin-top:12px;
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .task-toggle{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:#111827;
+    }
+
     /* ==== カレンダー画面（Calendar v0） ==== */
     .calendar-view{
       flex:1;
@@ -1325,6 +1689,23 @@ position: absolute;
       gap:8px;
       flex-wrap:wrap;
       align-items:center;
+    }
+    .cal-task{
+      border:1px solid #e5e7eb;
+      background:#f9fafb;
+      border-radius:12px;
+      padding:8px;
+      margin-bottom:6px;
+    }
+    .cal-task-title{
+      font-size:12px;
+      font-weight:700;
+      color:#111827;
+    }
+    .cal-task-meta{
+      font-size:11px;
+      color:#6b7280;
+      margin-top:4px;
     }
     .cal-event-actions{
       display:flex;
@@ -1614,7 +1995,7 @@ position: absolute;
         <span class="dropdown-check" data-check-for="chat">✔</span>
       </button>
       <button class="dropdown-item tab-row" data-menu="tasks">
-        <span class="dropdown-label">📋 今日のタスク</span>
+        <span class="dropdown-label">📋 タスク</span>
         <span class="dropdown-check" data-check-for="tasks">✔</span>
       </button>
       <button class="dropdown-item tab-row" data-menu="diary">
@@ -1899,7 +2280,304 @@ position: absolute;
     </div>
 
 
-    <!-- カレンダー画面（Calendar v0） -->
+    <!-- タスク画面（Tasks v1） -->
+    <div class="tasks-view" id="tasksView">
+      <div class="tasks-header">
+        <div>
+          <div class="tasks-title">📋 タスク</div>
+          <div class="tasks-subtitle" id="tasksSubtitle">今日の計画と進捗を整理しよう</div>
+        </div>
+        <button class="tasks-close-btn" id="tasksCloseBtn">閉じる</button>
+      </div>
+
+      <div class="tasks-subnav" id="tasksSubnav">
+        <button class="tasks-tab active" data-tasks-tab="dashboard">今日</button>
+        <button class="tasks-tab" data-tasks-tab="list">一覧</button>
+        <button class="tasks-tab" data-tasks-tab="templates">テンプレ</button>
+      </div>
+
+      <div class="tasks-panel active" data-tasks-panel="dashboard">
+        <div class="tasks-card">
+          <div class="tasks-card-title">
+            <span>次にやること</span>
+            <span class="tasks-card-sub" id="nextTaskHint">---</span>
+          </div>
+          <div id="nextTaskBox" class="task-empty">まだおすすめがないよ。</div>
+        </div>
+
+        <div class="tasks-card">
+          <div class="tasks-card-title">
+            <span>今日のタスク</span>
+            <span class="tasks-card-sub" id="todayTaskCount">---</span>
+          </div>
+          <div id="todayTasksList" class="task-list"></div>
+        </div>
+
+        <div class="tasks-card">
+          <div class="tasks-card-title">
+            <span>今日の達成状況</span>
+            <span class="tasks-card-sub" id="todayStatusSub">---</span>
+          </div>
+          <div class="task-status-grid">
+            <div class="task-status-card">
+              <div class="task-status-label">できなかった</div>
+              <div class="task-status-count" id="statusNotDoneCount">0</div>
+            </div>
+            <div class="task-status-card">
+              <div class="task-status-label">やろうとした</div>
+              <div class="task-status-count" id="statusTriedCount">0</div>
+            </div>
+            <div class="task-status-card">
+              <div class="task-status-label">途中まで</div>
+              <div class="task-status-count" id="statusPartialCount">0</div>
+            </div>
+            <div class="task-status-card">
+              <div class="task-status-label">完璧</div>
+              <div class="task-status-count" id="statusPerfectCount">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tasks-card">
+          <div class="tasks-card-title">
+            <span>クイック追加</span>
+            <span class="tasks-card-sub">最小入力でOK</span>
+          </div>
+          <div class="task-field">
+            <label class="task-label" for="quickTaskTitle">タイトル</label>
+            <input class="task-input" id="quickTaskTitle" type="text" maxlength="80" placeholder="例：レポートの下書きを書く" />
+          </div>
+          <div class="task-row">
+            <div class="task-field" style="flex:1;min-width:120px;">
+              <label class="task-label" for="quickTaskPriority">優先度</label>
+              <select class="task-select" id="quickTaskPriority">
+                <option value="3">3（ふつう）</option>
+                <option value="5">5（最優先）</option>
+                <option value="4">4（高め）</option>
+                <option value="2">2（低め）</option>
+                <option value="1">1（かなり低い）</option>
+              </select>
+            </div>
+            <div class="task-field" style="flex:1;min-width:140px;">
+              <label class="task-label" for="quickTaskDue">期限</label>
+              <input class="task-input" id="quickTaskDue" type="date" />
+            </div>
+          </div>
+          <div class="task-row">
+            <div class="task-field" style="flex:1;min-width:140px;">
+              <label class="task-label" for="quickTaskCategory">種類（カテゴリ）</label>
+              <input class="task-input" id="quickTaskCategory" type="text" maxlength="30" placeholder="例：勉強 / 生活" />
+            </div>
+            <div class="task-field" style="flex:1;min-width:140px;">
+              <label class="task-label" for="quickTaskRole">役割</label>
+              <select class="task-select" id="quickTaskRole">
+                <option value="normal">通常タスク</option>
+                <option value="daily">日目標</option>
+                <option value="weekly">週目標</option>
+                <option value="goal">最終目標</option>
+              </select>
+            </div>
+          </div>
+          <div class="task-actions">
+            <button class="task-btn primary" id="quickTaskAddBtn">追加</button>
+            <button class="task-btn" id="quickTaskOpenBtn">詳細入力</button>
+          </div>
+        </div>
+
+        <div class="tasks-card">
+          <div class="tasks-card-title">
+            <span>目標と自動生成</span>
+            <span class="tasks-card-sub" id="goalHint">---</span>
+          </div>
+          <div class="task-field">
+            <label class="task-label" for="goalTitleInput">最終目標</label>
+            <input class="task-input" id="goalTitleInput" type="text" maxlength="80" placeholder="例：TOEIC 700点を達成する" />
+          </div>
+          <div class="task-row">
+            <div class="task-field" style="flex:1;min-width:120px;">
+              <label class="task-label" for="goalPrioritySelect">優先度</label>
+              <select class="task-select" id="goalPrioritySelect">
+                <option value="3">3（ふつう）</option>
+                <option value="5">5（最優先）</option>
+                <option value="4">4（高め）</option>
+                <option value="2">2（低め）</option>
+                <option value="1">1（かなり低い）</option>
+              </select>
+            </div>
+            <div class="task-field" style="flex:1;min-width:140px;">
+              <label class="task-label" for="goalDueInput">期限（任意）</label>
+              <input class="task-input" id="goalDueInput" type="date" />
+            </div>
+          </div>
+          <label class="task-toggle" for="goalAutoToggle">
+            <input id="goalAutoToggle" type="checkbox" checked />
+            週/日目標を自動生成する（最初だけ）
+          </label>
+          <div class="task-actions">
+            <button class="task-btn primary" id="goalSaveBtn">目標を保存</button>
+            <button class="task-btn" id="goalClearBtn">目標を解除</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tasks-panel" data-tasks-panel="list">
+        <div class="tasks-card">
+          <div class="tasks-card-title">
+            <span>フィルタ & ソート</span>
+            <span class="tasks-card-sub" id="taskFilterHint">---</span>
+          </div>
+          <div class="task-filter-row">
+            <div class="task-field" style="flex:1;min-width:140px;">
+              <label class="task-label" for="taskStatusFilter">状態</label>
+              <select class="task-select" id="taskStatusFilter">
+                <option value="open">未完了</option>
+                <option value="all">すべて</option>
+                <option value="done">完璧のみ</option>
+              </select>
+            </div>
+            <div class="task-field" style="flex:1;min-width:140px;">
+              <label class="task-label" for="taskRoleFilter">役割</label>
+              <select class="task-select" id="taskRoleFilter">
+                <option value="all">すべて</option>
+                <option value="normal">通常タスク</option>
+                <option value="daily">日目標</option>
+                <option value="weekly">週目標</option>
+                <option value="goal">最終目標</option>
+              </select>
+            </div>
+            <div class="task-field" style="flex:1;min-width:140px;">
+              <label class="task-label" for="taskCategoryFilter">カテゴリ</label>
+              <input class="task-input" id="taskCategoryFilter" type="text" maxlength="30" placeholder="例：勉強" />
+            </div>
+            <div class="task-field" style="flex:1;min-width:140px;">
+              <label class="task-label" for="taskSortSelect">並び替え</label>
+              <select class="task-select" id="taskSortSelect">
+                <option value="due">期限が近い</option>
+                <option value="priority">優先度が高い</option>
+                <option value="manual">手動</option>
+                <option value="created">作成順</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="tasks-card">
+          <div class="tasks-card-title">
+            <span>タスク一覧</span>
+            <span class="tasks-card-sub" id="taskListCount">---</span>
+          </div>
+          <div id="taskList" class="task-list"></div>
+        </div>
+      </div>
+
+      <div class="tasks-panel" data-tasks-panel="templates">
+        <div class="tasks-card">
+          <div class="tasks-card-title">
+            <span>テンプレ作成</span>
+            <span class="tasks-card-sub">ワンタップ生成</span>
+          </div>
+          <div class="task-field">
+            <label class="task-label" for="templateNameInput">テンプレ名</label>
+            <input class="task-input" id="templateNameInput" type="text" maxlength="40" placeholder="例：朝のルーティン" />
+          </div>
+          <div class="task-actions">
+            <button class="task-btn primary" id="createTemplateBtn">作成</button>
+          </div>
+        </div>
+
+        <div class="tasks-card">
+          <div class="tasks-card-title">
+            <span>テンプレ一覧</span>
+            <span class="tasks-card-sub" id="templateCount">---</span>
+          </div>
+          <div id="templateList"></div>
+        </div>
+      </div>
+
+      <div class="task-sheet" id="taskSheet">
+        <div class="task-sheet-card">
+          <div class="task-sheet-head">
+            <div>
+              <div class="task-sheet-title" id="taskSheetTitle">タスクを編集</div>
+              <div class="task-sheet-sub" id="taskSheetSub">---</div>
+            </div>
+            <button class="task-btn" id="taskSheetCloseBtn" type="button">閉じる</button>
+          </div>
+
+          <div class="task-field">
+            <label class="task-label" for="taskSheetTitleInput">タイトル</label>
+            <input class="task-input" id="taskSheetTitleInput" type="text" maxlength="80" />
+          </div>
+
+          <div class="task-row">
+            <div class="task-field" style="flex:1;min-width:120px;">
+              <label class="task-label" for="taskSheetPriority">優先度</label>
+              <select class="task-select" id="taskSheetPriority">
+                <option value="5">5（最優先）</option>
+                <option value="4">4（高め）</option>
+                <option value="3">3（ふつう）</option>
+                <option value="2">2（低め）</option>
+                <option value="1">1（かなり低い）</option>
+              </select>
+            </div>
+            <div class="task-field" style="flex:1;min-width:140px;">
+              <label class="task-label" for="taskSheetDue">期限</label>
+              <input class="task-input" id="taskSheetDue" type="date" />
+            </div>
+          </div>
+
+          <div class="task-row">
+            <div class="task-field" style="flex:1;min-width:140px;">
+              <label class="task-label" for="taskSheetCategory">種類（カテゴリ）</label>
+              <input class="task-input" id="taskSheetCategory" type="text" maxlength="30" />
+            </div>
+            <div class="task-field" style="flex:1;min-width:140px;">
+              <label class="task-label" for="taskSheetRole">役割</label>
+              <select class="task-select" id="taskSheetRole">
+                <option value="normal">通常タスク</option>
+                <option value="daily">日目標</option>
+                <option value="weekly">週目標</option>
+                <option value="goal">最終目標</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="task-field" id="taskSheetStatusField">
+            <label class="task-label" for="taskSheetStatus">達成状況</label>
+            <select class="task-select" id="taskSheetStatus">
+              <option value="not_done">できなかった</option>
+              <option value="tried">やろうとした</option>
+              <option value="partial">途中まで</option>
+              <option value="perfect">完璧</option>
+            </select>
+          </div>
+
+          <div class="task-field" id="taskSheetRepeatField">
+            <label class="task-label" for="taskSheetRepeat">繰り返し</label>
+            <select class="task-select" id="taskSheetRepeat">
+              <option value="">なし</option>
+              <option value="daily">毎日</option>
+              <option value="weekdays">平日</option>
+              <option value="weekly">毎週</option>
+            </select>
+          </div>
+
+          <div class="task-field" id="taskSheetTemplateToggleField" style="display:none;">
+            <label class="task-label" for="taskSheetApplyTemplate">変更の適用先</label>
+            <select class="task-select" id="taskSheetApplyTemplate">
+              <option value="template">テンプレに反映（次回も適用）</option>
+              <option value="instance">今回だけ変更</option>
+            </select>
+          </div>
+
+          <div class="task-sheet-footer">
+            <button class="task-btn" id="taskSheetCancelBtn" type="button">キャンセル</button>
+            <button class="task-btn primary" id="taskSheetSaveBtn" type="button">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="calendar-view" id="calendarView">
       <div class="cal-header">
         <div>
@@ -1937,6 +2615,11 @@ position: absolute;
         <div class="cal-section">
           <div class="cal-section-title">🗓 予定</div>
           <div id="calEventsList"></div>
+        </div>
+
+        <div class="cal-section">
+          <div class="cal-section-title">?? ???</div>
+          <div id="calTasksList"></div>
         </div>
 
         <div class="cal-section">
@@ -2126,6 +2809,7 @@ position: absolute;
     </div>
 
 
+  <script src="/storage/storage.js"></script>
   <script>
     // DOM参照
     const appEl = document.querySelector('.app');
@@ -2344,7 +3028,69 @@ position: absolute;
     const diaryHistoryList = document.getElementById('diaryHistoryList');
     const diaryHistorySub = document.getElementById('diaryHistorySub');
 
-    
+    // ==== タスク（Tasks v1）DOM参照 ====
+    const tasksView = document.getElementById('tasksView');
+    const tasksCloseBtn = document.getElementById('tasksCloseBtn');
+    const tasksSubnav = document.getElementById('tasksSubnav');
+    const tasksSubtitle = document.getElementById('tasksSubtitle');
+
+    const nextTaskBox = document.getElementById('nextTaskBox');
+    const nextTaskHint = document.getElementById('nextTaskHint');
+    const todayTasksList = document.getElementById('todayTasksList');
+    const todayTaskCount = document.getElementById('todayTaskCount');
+    const todayStatusSub = document.getElementById('todayStatusSub');
+    const statusNotDoneCount = document.getElementById('statusNotDoneCount');
+    const statusTriedCount = document.getElementById('statusTriedCount');
+    const statusPartialCount = document.getElementById('statusPartialCount');
+    const statusPerfectCount = document.getElementById('statusPerfectCount');
+
+    const quickTaskTitle = document.getElementById('quickTaskTitle');
+    const quickTaskPriority = document.getElementById('quickTaskPriority');
+    const quickTaskDue = document.getElementById('quickTaskDue');
+    const quickTaskCategory = document.getElementById('quickTaskCategory');
+    const quickTaskRole = document.getElementById('quickTaskRole');
+    const quickTaskAddBtn = document.getElementById('quickTaskAddBtn');
+    const quickTaskOpenBtn = document.getElementById('quickTaskOpenBtn');
+
+    const goalTitleInput = document.getElementById('goalTitleInput');
+    const goalPrioritySelect = document.getElementById('goalPrioritySelect');
+    const goalDueInput = document.getElementById('goalDueInput');
+    const goalAutoToggle = document.getElementById('goalAutoToggle');
+    const goalSaveBtn = document.getElementById('goalSaveBtn');
+    const goalClearBtn = document.getElementById('goalClearBtn');
+    const goalHint = document.getElementById('goalHint');
+
+    const taskStatusFilter = document.getElementById('taskStatusFilter');
+    const taskRoleFilter = document.getElementById('taskRoleFilter');
+    const taskCategoryFilter = document.getElementById('taskCategoryFilter');
+    const taskSortSelect = document.getElementById('taskSortSelect');
+    const taskList = document.getElementById('taskList');
+    const taskListCount = document.getElementById('taskListCount');
+    const taskFilterHint = document.getElementById('taskFilterHint');
+
+    const templateNameInput = document.getElementById('templateNameInput');
+    const createTemplateBtn = document.getElementById('createTemplateBtn');
+    const templateList = document.getElementById('templateList');
+    const templateCount = document.getElementById('templateCount');
+
+    const taskSheet = document.getElementById('taskSheet');
+    const taskSheetTitle = document.getElementById('taskSheetTitle');
+    const taskSheetSub = document.getElementById('taskSheetSub');
+    const taskSheetCloseBtn = document.getElementById('taskSheetCloseBtn');
+    const taskSheetCancelBtn = document.getElementById('taskSheetCancelBtn');
+    const taskSheetSaveBtn = document.getElementById('taskSheetSaveBtn');
+    const taskSheetTitleInput = document.getElementById('taskSheetTitleInput');
+    const taskSheetPriority = document.getElementById('taskSheetPriority');
+    const taskSheetDue = document.getElementById('taskSheetDue');
+    const taskSheetCategory = document.getElementById('taskSheetCategory');
+    const taskSheetRole = document.getElementById('taskSheetRole');
+    const taskSheetStatus = document.getElementById('taskSheetStatus');
+    const taskSheetRepeat = document.getElementById('taskSheetRepeat');
+    const taskSheetStatusField = document.getElementById('taskSheetStatusField');
+    const taskSheetRepeatField = document.getElementById('taskSheetRepeatField');
+    const taskSheetTemplateToggleField = document.getElementById('taskSheetTemplateToggleField');
+    const taskSheetApplyTemplate = document.getElementById('taskSheetApplyTemplate');
+
     // ==== カレンダー（Calendar v0）DOM参照 ====
     const calendarView = document.getElementById('calendarView');
     const calendarCloseBtn = document.getElementById('calendarCloseBtn');
@@ -2358,6 +3104,7 @@ position: absolute;
     const calPanelSub = document.getElementById('calPanelSub');
     const calAddBtn = document.getElementById('calAddBtn');
     const calEventsList = document.getElementById('calEventsList');
+    const calTasksList = document.getElementById('calTasksList');
     const calDiaryBox = document.getElementById('calDiaryBox');
     const calChatBox = document.getElementById('calChatBox');
 
@@ -2426,6 +3173,9 @@ const PROFILE_KEY_V2 = 'cobeing_profile_v2';
       'cobeing_first_date',         // Day N 用の初回日付
       'cobeing_persona_preset_v1',  // AIのモード（PERSONA_KEY の中身を直書き）
       'cobeing_diary_v1',           // ✅ 日記（Diary v0）
+      'cobeing_tasks_v1',           // ????Tasks v1?
+      'cobeing_templates_v1',       // ???????Tasks v1?
+      'cobeing_goal_settings_v1',   // ?????Tasks v1?
 
     ];
 
@@ -2440,6 +3190,7 @@ const PROFILE_KEY_V2 = 'cobeing_profile_v2';
         '・タブ設定\n' +
         '・タブ設定\n' +
         '・日記\n' +
+        '・タスク / テンプレ\n' +
         '・相棒のモード などが消えます。\n\n' +
         '本当に続行してもいい？'
       );
@@ -2717,11 +3468,14 @@ const MAX_IMAGE_MB = 8;
 
       // 画面モードを一旦リセット
       appEl.classList.remove('profile-mode');
+      appEl.classList.remove('tasks-mode');
       appEl.classList.remove('diary-mode');
       appEl.classList.remove('calendar-mode');
 
       // タブごとの表示
-      if (tabId === 'diary') {
+      if (tabId === 'tasks') {
+        openTasksView();
+      } else if (tabId === 'diary') {
         openDiaryView();
       } else if (tabId === 'schedule') {
         openCalendarView();
@@ -3331,6 +4085,1739 @@ const MAX_IMAGE_MB = 8;
       return getDiaryForChatByIsoKey(key);
     }
 
+    // ==============================
+    // ==== タスク（Tasks v1）ロジック ====
+    // ==============================
+    const TASK_STORE_KEY = 'cobeing_tasks_v1';
+    const TEMPLATE_STORE_KEY = 'cobeing_templates_v1';
+    const GOAL_SETTINGS_KEY = 'cobeing_goal_settings_v1';
+
+    const TASK_ROLES = ['normal', 'daily', 'weekly', 'goal'];
+    const TASK_STATUSES = ['not_done', 'tried', 'partial', 'perfect'];
+    const TASK_STATUS_LABELS = {
+      not_done: 'できなかった',
+      tried: 'やろうとした',
+      partial: '途中まで',
+      perfect: '完璧',
+    };
+
+    function fallbackCreateStore(options) {
+      const key = options && options.key ? String(options.key) : '';
+      const version = Number(options && options.version) || 1;
+      const defaultData = options && options.defaultData ? options.defaultData : {};
+
+      function load() {
+        if (!key) return { schemaVersion: version, data: defaultData };
+        try {
+          const raw = localStorage.getItem(key);
+          if (!raw) return { schemaVersion: version, data: defaultData };
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object') return { schemaVersion: version, data: defaultData };
+          return { schemaVersion: parsed.schemaVersion || version, data: parsed.data || defaultData };
+        } catch (err) {
+          return { schemaVersion: version, data: defaultData };
+        }
+      }
+
+      function save(data) {
+        if (!key) return;
+        const payload = { schemaVersion: version, data: data || defaultData };
+        try {
+          localStorage.setItem(key, JSON.stringify(payload));
+        } catch (err) {
+          console.warn('[task storage] save failed', err);
+        }
+      }
+
+      return { load, save, key, version };
+    }
+
+    const storageApi = (window.CobeingStorage && window.CobeingStorage.createStore)
+      ? window.CobeingStorage
+      : { createStore: fallbackCreateStore };
+
+    function migrateTaskStore(data) {
+      if (Array.isArray(data)) {
+        return { tasks: data };
+      }
+      if (data && typeof data === 'object' && Array.isArray(data.tasks)) {
+        return data;
+      }
+      return { tasks: [] };
+    }
+
+    function migrateTemplateStore(data) {
+      if (Array.isArray(data)) {
+        return { templates: data };
+      }
+      if (data && typeof data === 'object' && Array.isArray(data.templates)) {
+        return data;
+      }
+      return { templates: [] };
+    }
+
+    function migrateGoalSettings(data) {
+      if (!data || typeof data !== 'object') {
+        return { autoGenerate: true };
+      }
+      return data;
+    }
+
+    const taskStore = storageApi.createStore({
+      key: TASK_STORE_KEY,
+      version: 1,
+      defaultData: { tasks: [] },
+      migrate: migrateTaskStore,
+    });
+
+    const templateStore = storageApi.createStore({
+      key: TEMPLATE_STORE_KEY,
+      version: 1,
+      defaultData: { templates: [] },
+      migrate: migrateTemplateStore,
+    });
+
+    const goalSettingsStore = storageApi.createStore({
+      key: GOAL_SETTINGS_KEY,
+      version: 1,
+      defaultData: { autoGenerate: true },
+      migrate: migrateGoalSettings,
+    });
+
+    const taskState = {
+      tasks: [],
+      templates: [],
+      goalSettings: {
+        autoGenerate: true,
+        goalTaskId: null,
+        weeklyTemplateId: null,
+        dailyTemplateId: null,
+        lastWeeklyGenerated: null,
+        lastDailyGenerated: null,
+      },
+      filters: {
+        status: 'open',
+        role: 'all',
+        category: '',
+        sort: 'due',
+      },
+      activePanel: 'dashboard',
+    };
+
+    function createId(prefix) {
+      if (window.crypto && window.crypto.randomUUID) {
+        return `${prefix}_${window.crypto.randomUUID()}`;
+      }
+      const rand = Math.random().toString(36).slice(2, 8);
+      return `${prefix}_${Date.now().toString(36)}_${rand}`;
+    }
+
+    function clampPriority(value) {
+      const num = Number(value);
+      if (!Number.isFinite(num)) return 3;
+      return Math.min(5, Math.max(1, Math.round(num)));
+    }
+
+    function normalizeRole(role) {
+      const val = String(role || '').trim();
+      return TASK_ROLES.includes(val) ? val : 'normal';
+    }
+
+    function normalizeStatus(status) {
+      const val = String(status || '').trim();
+      return TASK_STATUSES.includes(val) ? val : 'not_done';
+    }
+
+    function normalizeRepeat(repeat) {
+      if (!repeat) return null;
+      if (typeof repeat === 'string') {
+        if (repeat === 'weekdays') {
+          return { freq: 'daily', interval: 1, byweekday: [1, 2, 3, 4, 5] };
+        }
+        return { freq: repeat, interval: 1 };
+      }
+      if (!repeat.freq) return null;
+      const freq = repeat.freq === 'weekdays' ? 'daily' : repeat.freq;
+      const interval = Number(repeat.interval) || 1;
+      const byweekday = Array.isArray(repeat.byweekday) ? repeat.byweekday.filter(n => Number.isFinite(n)) : null;
+      if (repeat.freq === 'weekdays') {
+        return { freq: 'daily', interval: 1, byweekday: [1, 2, 3, 4, 5] };
+      }
+      return { freq, interval, byweekday };
+    }
+
+    function normalizeRepeatWithDefaults(repeat, dueAt) {
+      const normalized = normalizeRepeat(repeat);
+      if (!normalized) return null;
+      if (normalized.freq === 'weekly' && (!normalized.byweekday || normalized.byweekday.length === 0)) {
+        const baseKey = normalizeDateKey(dueAt) || getIsoDateKey(new Date());
+        const date = parseDateKey(baseKey) || new Date();
+        normalized.byweekday = [date.getDay()];
+      }
+      return normalized;
+    }
+
+    function normalizeDateKey(value) {
+      if (!value) return '';
+      const trimmed = String(value).trim();
+      if (!trimmed) return '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+      const parsed = new Date(trimmed);
+      if (Number.isNaN(parsed.getTime())) return '';
+      return getIsoDateKey(parsed);
+    }
+
+    function parseDateKey(dateKey) {
+      if (!dateKey || !/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return null;
+      const [y, m, d] = dateKey.split('-').map(n => parseInt(n, 10));
+      return new Date(y, m - 1, d);
+    }
+
+    function addDays(date, days) {
+      const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function diffDays(fromKey, toKey) {
+      const from = parseDateKey(fromKey);
+      const to = parseDateKey(toKey);
+      if (!from || !to) return 0;
+      const diff = to.getTime() - from.getTime();
+      return Math.round(diff / (1000 * 60 * 60 * 24));
+    }
+
+    function getWeekStart(date) {
+      const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const day = d.getDay();
+      d.setDate(d.getDate() - day);
+      return d;
+    }
+
+    function getWeekKey(date) {
+      const start = getWeekStart(date);
+      const year = start.getFullYear();
+      const first = new Date(year, 0, 1);
+      const diffDays = Math.floor((start - first) / (1000 * 60 * 60 * 24));
+      const weekNum = Math.floor(diffDays / 7) + 1;
+      return `${year}-W${String(weekNum).padStart(2, '0')}`;
+    }
+
+    function normalizeTask(raw) {
+      if (!raw || typeof raw !== 'object') return null;
+      const now = new Date().toISOString();
+      const dueAt = normalizeDateKey(raw.dueAt);
+      return {
+        id: raw.id ? String(raw.id) : createId('task'),
+        title: String(raw.title || '').trim(),
+        priority: clampPriority(raw.priority),
+        dueAt: dueAt || '',
+        category: String(raw.category || '').trim(),
+        role: normalizeRole(raw.role),
+        status: normalizeStatus(raw.status),
+        repeat: normalizeRepeat(raw.repeat),
+        templateId: raw.templateId || null,
+        instanceOfTemplateId: raw.instanceOfTemplateId || null,
+        templateItemId: raw.templateItemId || null,
+        generatedFor: raw.generatedFor || null,
+        isRepeatTemplate: !!raw.isRepeatTemplate,
+        manualOrder: Number.isFinite(raw.manualOrder) ? raw.manualOrder : Date.now(),
+        createdAt: raw.createdAt || now,
+        updatedAt: raw.updatedAt || now,
+      };
+    }
+
+    function normalizeTemplateItem(raw) {
+      if (!raw || typeof raw !== 'object') return null;
+      return {
+        id: raw.id ? String(raw.id) : createId('tpl_item'),
+        title: String(raw.title || '').trim(),
+        priority: clampPriority(raw.priority),
+        category: String(raw.category || '').trim(),
+        role: normalizeRole(raw.role),
+        dueOffsetDays: Number.isFinite(raw.dueOffsetDays) ? raw.dueOffsetDays : null,
+        createdAt: raw.createdAt || new Date().toISOString(),
+        updatedAt: raw.updatedAt || new Date().toISOString(),
+      };
+    }
+
+    function normalizeTemplate(raw) {
+      if (!raw || typeof raw !== 'object') return null;
+      const items = Array.isArray(raw.items) ? raw.items.map(normalizeTemplateItem).filter(Boolean) : [];
+      const baseDate = normalizeDateKey(raw.baseDate || getIsoDateKey(new Date()));
+      return {
+        id: raw.id ? String(raw.id) : createId('tpl'),
+        name: String(raw.name || '').trim(),
+        kind: raw.kind || 'custom',
+        baseDate: baseDate || getIsoDateKey(new Date()),
+        items,
+        createdAt: raw.createdAt || new Date().toISOString(),
+        updatedAt: raw.updatedAt || new Date().toISOString(),
+      };
+    }
+
+    function normalizeGoalSettings(raw) {
+      const base = {
+        autoGenerate: true,
+        goalTaskId: null,
+        weeklyTemplateId: null,
+        dailyTemplateId: null,
+        lastWeeklyGenerated: null,
+        lastDailyGenerated: null,
+      };
+      if (!raw || typeof raw !== 'object') return base;
+      return {
+        autoGenerate: raw.autoGenerate !== false,
+        goalTaskId: raw.goalTaskId || null,
+        weeklyTemplateId: raw.weeklyTemplateId || null,
+        dailyTemplateId: raw.dailyTemplateId || null,
+        lastWeeklyGenerated: raw.lastWeeklyGenerated || null,
+        lastDailyGenerated: raw.lastDailyGenerated || null,
+      };
+    }
+
+    function loadTaskState() {
+      const loadedTasks = taskStore.load().data;
+      taskState.tasks = Array.isArray(loadedTasks.tasks)
+        ? loadedTasks.tasks.map(normalizeTask).filter(Boolean)
+        : [];
+
+      const loadedTemplates = templateStore.load().data;
+      taskState.templates = Array.isArray(loadedTemplates.templates)
+        ? loadedTemplates.templates.map(normalizeTemplate).filter(Boolean)
+        : [];
+
+      const loadedGoal = goalSettingsStore.load().data;
+      taskState.goalSettings = normalizeGoalSettings(loadedGoal);
+    }
+
+    function saveTasks() {
+      taskStore.save({ tasks: taskState.tasks });
+    }
+
+    function saveTemplates() {
+      templateStore.save({ templates: taskState.templates });
+    }
+
+    function saveGoalSettings() {
+      goalSettingsStore.save(taskState.goalSettings);
+    }
+
+    function getTaskById(id) {
+      return taskState.tasks.find(t => t.id === id) || null;
+    }
+
+    function getTemplateById(id) {
+      return taskState.templates.find(t => t.id === id) || null;
+    }
+
+    function getGoalTask() {
+      if (!taskState.goalSettings.goalTaskId) return null;
+      return getTaskById(taskState.goalSettings.goalTaskId);
+    }
+
+    function isTaskDone(task) {
+      return task.status === 'perfect';
+    }
+
+    function isTaskOpen(task) {
+      return task.status !== 'perfect';
+    }
+
+    function getTaskDateKey(task) {
+      return normalizeDateKey(task.dueAt);
+    }
+
+    function getTasksDueOn(dateKey) {
+      return taskState.tasks.filter(task => {
+        if (task.isRepeatTemplate) return false;
+        const dueKey = getTaskDateKey(task);
+        if (!dueKey) return false;
+        return dueKey === dateKey;
+      });
+    }
+
+    function getTasksForToday() {
+      const todayKey = getIsoDateKey(new Date());
+      return getTasksDueOn(todayKey);
+    }
+
+    function sortTasksByDue(tasks) {
+      const copy = [...tasks];
+      copy.sort((a, b) => {
+        const aKey = getTaskDateKey(a) || '9999-12-31';
+        const bKey = getTaskDateKey(b) || '9999-12-31';
+        if (aKey !== bKey) return aKey.localeCompare(bKey);
+        if (a.priority !== b.priority) return b.priority - a.priority;
+        return (a.title || '').localeCompare((b.title || ''), 'ja');
+      });
+      return copy;
+    }
+
+    function sortTasksByPriority(tasks) {
+      const copy = [...tasks];
+      copy.sort((a, b) => {
+        if (a.priority !== b.priority) return b.priority - a.priority;
+        const aKey = getTaskDateKey(a) || '9999-12-31';
+        const bKey = getTaskDateKey(b) || '9999-12-31';
+        if (aKey !== bKey) return aKey.localeCompare(bKey);
+        return (a.title || '').localeCompare((b.title || ''), 'ja');
+      });
+      return copy;
+    }
+
+    function sortTasksByManual(tasks) {
+      const copy = [...tasks];
+      copy.sort((a, b) => {
+        const ao = Number.isFinite(a.manualOrder) ? a.manualOrder : 0;
+        const bo = Number.isFinite(b.manualOrder) ? b.manualOrder : 0;
+        if (ao !== bo) return ao - bo;
+        return (a.title || '').localeCompare((b.title || ''), 'ja');
+      });
+      return copy;
+    }
+
+    function buildTemplateItemsFromTask(task, baseDateKey) {
+      const dueKey = getTaskDateKey(task);
+      const dueOffsetDays = dueKey ? diffDays(baseDateKey, dueKey) : null;
+      return {
+        id: createId('tpl_item'),
+        title: task.title,
+        priority: task.priority,
+        category: task.category,
+        role: task.role,
+        dueOffsetDays,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+
+    function createTaskFromData(data) {
+      const now = new Date().toISOString();
+      return {
+        id: data.id ? String(data.id) : createId('task'),
+        title: String(data.title || '').trim(),
+        priority: clampPriority(data.priority),
+        dueAt: normalizeDateKey(data.dueAt),
+        category: String(data.category || '').trim(),
+        role: normalizeRole(data.role),
+        status: normalizeStatus(data.status),
+        repeat: normalizeRepeat(data.repeat),
+        templateId: data.templateId || null,
+        instanceOfTemplateId: data.instanceOfTemplateId || null,
+        templateItemId: data.templateItemId || null,
+        generatedFor: data.generatedFor || null,
+        isRepeatTemplate: !!data.isRepeatTemplate,
+        manualOrder: Number.isFinite(data.manualOrder) ? data.manualOrder : Date.now(),
+        createdAt: data.createdAt || now,
+        updatedAt: data.updatedAt || now,
+      };
+    }
+
+    function upsertTask(task) {
+      const idx = taskState.tasks.findIndex(t => t.id === task.id);
+      if (idx === -1) {
+        taskState.tasks.push(task);
+      } else {
+        taskState.tasks[idx] = task;
+      }
+      saveTasks();
+    }
+
+    function deleteTaskById(id) {
+      taskState.tasks = taskState.tasks.filter(t => t.id !== id);
+      saveTasks();
+    }
+
+    function updateTaskStatus(taskId, status) {
+      const task = getTaskById(taskId);
+      if (!task) return;
+      task.status = normalizeStatus(status);
+      task.updatedAt = new Date().toISOString();
+      upsertTask(task);
+    }
+
+    function moveTaskManual(taskId, direction) {
+      const list = sortTasksByManual(applyTaskFilters(taskState.tasks));
+      const index = list.findIndex(t => t.id === taskId);
+      if (index === -1) return;
+      const swapIndex = direction === 'up' ? index - 1 : index + 1;
+      if (swapIndex < 0 || swapIndex >= list.length) return;
+      const current = list[index];
+      const swap = list[swapIndex];
+      const temp = current.manualOrder;
+      current.manualOrder = swap.manualOrder;
+      swap.manualOrder = temp;
+      current.updatedAt = new Date().toISOString();
+      swap.updatedAt = new Date().toISOString();
+      upsertTask(current);
+      upsertTask(swap);
+    }
+
+    function createTemplate(name, kind = 'custom') {
+      const now = new Date();
+      const baseDate = kind === 'weekly'
+        ? getIsoDateKey(getWeekStart(now))
+        : getIsoDateKey(now);
+      const template = {
+        id: createId('tpl'),
+        name: String(name || '').trim(),
+        kind,
+        baseDate,
+        items: [],
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+      };
+      taskState.templates.push(template);
+      saveTemplates();
+      return template;
+    }
+
+    function updateTemplate(template) {
+      const idx = taskState.templates.findIndex(t => t.id === template.id);
+      if (idx === -1) return;
+      taskState.templates[idx] = template;
+      saveTemplates();
+    }
+
+    function removeTemplate(templateId) {
+      taskState.templates = taskState.templates.filter(t => t.id !== templateId);
+      saveTemplates();
+    }
+
+    function ensureGoalTemplates() {
+      const goalTask = getGoalTask();
+      if (!goalTask) return;
+      if (!taskState.goalSettings.autoGenerate) return;
+
+      if (!taskState.goalSettings.weeklyTemplateId || !taskState.goalSettings.dailyTemplateId) {
+        const { weeklyTemplate, dailyTemplate } = autoGenerateGoalTemplates(goalTask);
+        taskState.goalSettings.weeklyTemplateId = weeklyTemplate ? weeklyTemplate.id : null;
+        taskState.goalSettings.dailyTemplateId = dailyTemplate ? dailyTemplate.id : null;
+        saveGoalSettings();
+      }
+    }
+
+    function autoGenerateGoalTemplates(goalTask) {
+      const goalTitle = goalTask.title || '目標';
+      const weeklyTemplate = createTemplate('週目標テンプレ', 'weekly');
+      const dailyTemplate = createTemplate('日目標テンプレ', 'daily');
+
+      weeklyTemplate.items = [
+        {
+          id: createId('tpl_item'),
+          title: `今週の進め方：${goalTitle}`,
+          priority: 4,
+          category: 'goal',
+          role: 'weekly',
+          dueOffsetDays: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: createId('tpl_item'),
+          title: `小さな一歩：${goalTitle} の準備`,
+          priority: 3,
+          category: 'goal',
+          role: 'weekly',
+          dueOffsetDays: 2,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: createId('tpl_item'),
+          title: `振り返り：${goalTitle} の進捗確認`,
+          priority: 3,
+          category: 'goal',
+          role: 'weekly',
+          dueOffsetDays: 5,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+      weeklyTemplate.updatedAt = new Date().toISOString();
+      updateTemplate(weeklyTemplate);
+
+      dailyTemplate.items = [
+        {
+          id: createId('tpl_item'),
+          title: `今日の一歩：${goalTitle} を15分進める`,
+          priority: 4,
+          category: 'goal',
+          role: 'daily',
+          dueOffsetDays: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: createId('tpl_item'),
+          title: `小さな行動：${goalTitle} の準備を1つ`,
+          priority: 3,
+          category: 'goal',
+          role: 'daily',
+          dueOffsetDays: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: createId('tpl_item'),
+          title: `今日のメモ：${goalTitle} を一言で記録`,
+          priority: 2,
+          category: 'goal',
+          role: 'daily',
+          dueOffsetDays: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+      dailyTemplate.updatedAt = new Date().toISOString();
+      updateTemplate(dailyTemplate);
+
+      return { weeklyTemplate, dailyTemplate };
+    }
+
+    function createRepeatSeed(taskData) {
+      const now = new Date().toISOString();
+      const seedId = createId('repeat');
+      const repeat = normalizeRepeatWithDefaults(taskData.repeat, taskData.dueAt);
+      const seed = createTaskFromData({
+        ...taskData,
+        id: seedId,
+        repeat: repeat,
+        templateId: seedId,
+        isRepeatTemplate: true,
+        status: 'not_done',
+        createdAt: now,
+        updatedAt: now,
+      });
+      const instance = createTaskFromData({
+        ...taskData,
+        repeat: null,
+        templateId: null,
+        instanceOfTemplateId: seedId,
+        generatedFor: normalizeDateKey(taskData.dueAt) || getIsoDateKey(new Date()),
+      });
+      taskState.tasks.push(seed, instance);
+      saveTasks();
+      return instance;
+    }
+
+    function shouldGenerateForRepeat(seed, dateKey) {
+      if (!seed || !seed.repeat) return false;
+      const repeat = seed.repeat;
+      const date = parseDateKey(dateKey);
+      if (!date) return false;
+      const weekday = date.getDay();
+
+      if (repeat.byweekday && Array.isArray(repeat.byweekday)) {
+        if (!repeat.byweekday.includes(weekday)) return false;
+      }
+
+      if (repeat.freq === 'daily') {
+        const last = taskState.tasks
+          .filter(t => t.instanceOfTemplateId === seed.id)
+          .map(t => getTaskDateKey(t))
+          .filter(Boolean)
+          .sort()
+          .pop();
+        if (!last) return true;
+        const diff = diffDays(last, dateKey);
+        return diff >= (repeat.interval || 1);
+      }
+
+      if (repeat.freq === 'weekly') {
+        const last = taskState.tasks
+          .filter(t => t.instanceOfTemplateId === seed.id)
+          .map(t => getTaskDateKey(t))
+          .filter(Boolean)
+          .sort()
+          .pop();
+        if (!last) return true;
+        const diff = diffDays(last, dateKey);
+        return diff >= 7 * (repeat.interval || 1);
+      }
+
+      return false;
+    }
+
+    function ensureRepeatsGenerated() {
+      const todayKey = getIsoDateKey(new Date());
+      const seeds = taskState.tasks.filter(t => t.isRepeatTemplate && t.repeat);
+      let changed = false;
+      seeds.forEach(seed => {
+        if (!shouldGenerateForRepeat(seed, todayKey)) return;
+        const dueKey = todayKey;
+        const exists = taskState.tasks.some(t => t.instanceOfTemplateId === seed.id && getTaskDateKey(t) === dueKey);
+        if (exists) return;
+        const instance = createTaskFromData({
+          title: seed.title,
+          priority: seed.priority,
+          dueAt: dueKey,
+          category: seed.category,
+          role: seed.role,
+          status: 'not_done',
+          repeat: null,
+          instanceOfTemplateId: seed.id,
+          generatedFor: dueKey,
+        });
+        taskState.tasks.push(instance);
+        changed = true;
+      });
+      if (changed) saveTasks();
+    }
+
+    function generateTasksFromTemplate(templateId, targetDate) {
+      const template = getTemplateById(templateId);
+      if (!template) return { created: 0 };
+
+      const date = targetDate || new Date();
+      const baseDate = template.kind === 'weekly'
+        ? getWeekStart(date)
+        : new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const periodKey = template.kind === 'weekly'
+        ? getWeekKey(baseDate)
+        : getIsoDateKey(baseDate);
+
+      const already = taskState.tasks.some(t => t.instanceOfTemplateId === template.id && t.generatedFor === periodKey);
+      if (already) return { created: 0 };
+
+      const created = [];
+      template.items.forEach(item => {
+        const hasOffset = Number.isFinite(item.dueOffsetDays);
+        const shouldHaveDue = hasOffset || template.kind !== 'custom';
+        const offset = hasOffset ? item.dueOffsetDays : 0;
+        const dueDate = addDays(baseDate, offset);
+        const dueAt = shouldHaveDue ? getIsoDateKey(dueDate) : '';
+        const role = item.role || (template.kind === 'weekly' ? 'weekly' : template.kind === 'daily' ? 'daily' : 'normal');
+        const task = createTaskFromData({
+          title: item.title,
+          priority: item.priority,
+          category: item.category,
+          role,
+          dueAt,
+          status: 'not_done',
+          repeat: null,
+          instanceOfTemplateId: template.id,
+          templateItemId: item.id,
+          generatedFor: periodKey,
+        });
+        created.push(task);
+      });
+
+      if (created.length) {
+        taskState.tasks.push(...created);
+        saveTasks();
+      }
+
+      return { created: created.length };
+    }
+
+    function ensureGoalRepeats() {
+      const goalSettings = taskState.goalSettings;
+      const now = new Date();
+      if (goalSettings.weeklyTemplateId) {
+        const weekKey = getWeekKey(now);
+        if (goalSettings.lastWeeklyGenerated !== weekKey) {
+          const result = generateTasksFromTemplate(goalSettings.weeklyTemplateId, now);
+          if (result.created) {
+            goalSettings.lastWeeklyGenerated = weekKey;
+          }
+        }
+      }
+
+      if (goalSettings.dailyTemplateId) {
+        const dayKey = getIsoDateKey(now);
+        if (goalSettings.lastDailyGenerated !== dayKey) {
+          const result = generateTasksFromTemplate(goalSettings.dailyTemplateId, now);
+          if (result.created) {
+            goalSettings.lastDailyGenerated = dayKey;
+          }
+        }
+      }
+
+      saveGoalSettings();
+    }
+
+    function initializeTasks() {
+      loadTaskState();
+      ensureGoalTemplates();
+      ensureRepeatsGenerated();
+      ensureGoalRepeats();
+    }
+
+    function setTasksPanel(panelId) {
+      if (!tasksView) return;
+      taskState.activePanel = panelId;
+      tasksView.querySelectorAll('[data-tasks-panel]').forEach(panel => {
+        const id = panel.getAttribute('data-tasks-panel');
+        panel.classList.toggle('active', id === panelId);
+      });
+      if (tasksSubnav) {
+        tasksSubnav.querySelectorAll('.tasks-tab').forEach(btn => {
+          const id = btn.getAttribute('data-tasks-tab');
+          btn.classList.toggle('active', id === panelId);
+        });
+      }
+    }
+
+    function openTasksView() {
+      appEl.classList.remove('profile-mode');
+      appEl.classList.remove('diary-mode');
+      appEl.classList.remove('calendar-mode');
+      appEl.classList.add('tasks-mode');
+      ensureRepeatsGenerated();
+      ensureGoalRepeats();
+      setTasksPanel(taskState.activePanel || 'dashboard');
+      renderTasksUI();
+    }
+
+    function closeTasksView(goToChat = true) {
+      appEl.classList.remove('tasks-mode');
+      if (goToChat) selectTab('chat');
+    }
+
+    function formatTaskDueLabel(task) {
+      const dueKey = getTaskDateKey(task);
+      if (!dueKey) return '';
+      const date = parseDateKey(dueKey);
+      return date ? formatDateLabelJa(date) : dueKey;
+    }
+
+    function getRoleLabel(role) {
+      switch (role) {
+        case 'daily':
+          return '日目標';
+        case 'weekly':
+          return '週目標';
+        case 'goal':
+          return '最終目標';
+        default:
+          return '通常';
+      }
+    }
+
+    function getRecommendedTask(tasks) {
+      const openTasks = tasks.filter(isTaskOpen);
+      if (!openTasks.length) return null;
+      const sorted = sortTasksByDue(openTasks);
+      return sorted[0] || null;
+    }
+
+    function renderTaskItem(task, options = {}) {
+      const item = document.createElement('div');
+      item.className = 'task-item';
+      item.setAttribute('data-task-id', task.id);
+
+      const head = document.createElement('div');
+      head.className = 'task-item-head';
+
+      const left = document.createElement('div');
+      const title = document.createElement('div');
+      title.className = 'task-title';
+      title.textContent = task.title || '(無題)';
+
+      const meta = document.createElement('div');
+      meta.className = 'task-meta';
+
+      const dueLabel = formatTaskDueLabel(task);
+      if (dueLabel) {
+        const due = document.createElement('span');
+        due.textContent = `期限 ${dueLabel}`;
+        meta.appendChild(due);
+      }
+
+      if (task.category) {
+        const cat = document.createElement('span');
+        cat.textContent = `種類 ${task.category}`;
+        meta.appendChild(cat);
+      }
+
+      const rolePill = document.createElement('span');
+      rolePill.className = 'task-pill';
+      rolePill.textContent = getRoleLabel(task.role);
+      meta.appendChild(rolePill);
+
+      const priorityPill = document.createElement('span');
+      priorityPill.className = 'task-pill';
+      if (task.priority >= 5) priorityPill.classList.add('priority-5');
+      if (task.priority === 4) priorityPill.classList.add('priority-4');
+      priorityPill.textContent = `優先 ${task.priority}`;
+      meta.appendChild(priorityPill);
+
+      if (task.instanceOfTemplateId) {
+        const tpl = document.createElement('span');
+        tpl.className = 'task-pill';
+        tpl.textContent = 'テンプレ由来';
+        meta.appendChild(tpl);
+      }
+
+      left.appendChild(title);
+      left.appendChild(meta);
+
+      const actions = document.createElement('div');
+      actions.className = 'task-actions';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'task-btn';
+      editBtn.textContent = '編集';
+      editBtn.setAttribute('data-action', 'edit');
+      actions.appendChild(editBtn);
+
+      if (options.showManualControls) {
+        const upBtn = document.createElement('button');
+        upBtn.className = 'task-btn';
+        upBtn.textContent = '↑';
+        upBtn.setAttribute('data-action', 'move-up');
+        actions.appendChild(upBtn);
+
+        const downBtn = document.createElement('button');
+        downBtn.className = 'task-btn';
+        downBtn.textContent = '↓';
+        downBtn.setAttribute('data-action', 'move-down');
+        actions.appendChild(downBtn);
+      }
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'task-btn danger';
+      deleteBtn.textContent = '削除';
+      deleteBtn.setAttribute('data-action', 'delete');
+      actions.appendChild(deleteBtn);
+
+      head.appendChild(left);
+      head.appendChild(actions);
+
+      const statusRow = document.createElement('div');
+      statusRow.className = 'task-status-row';
+      TASK_STATUSES.forEach(status => {
+        const btn = document.createElement('button');
+        btn.className = 'task-status-btn';
+        if (task.status === status) btn.classList.add('active');
+        btn.textContent = TASK_STATUS_LABELS[status];
+        btn.setAttribute('data-action', 'status');
+        btn.setAttribute('data-status', status);
+        statusRow.appendChild(btn);
+      });
+
+      item.appendChild(head);
+      item.appendChild(statusRow);
+
+      return item;
+    }
+
+    function renderTaskList(container, tasks, options = {}) {
+      if (!container) return;
+      container.innerHTML = '';
+      if (!tasks.length) {
+        const empty = document.createElement('div');
+        empty.className = 'task-empty';
+        empty.textContent = 'タスクがまだないよ。';
+        container.appendChild(empty);
+        return;
+      }
+      tasks.forEach(task => {
+        container.appendChild(renderTaskItem(task, options));
+      });
+    }
+
+    function renderTasksDashboard() {
+      const todayTasks = sortTasksByDue(getTasksForToday());
+      renderTaskList(todayTasksList, todayTasks, { showManualControls: false });
+      if (todayTaskCount) {
+        todayTaskCount.textContent = todayTasks.length ? `${todayTasks.length}件` : 'なし';
+      }
+
+      const counts = {
+        not_done: 0,
+        tried: 0,
+        partial: 0,
+        perfect: 0,
+      };
+      todayTasks.forEach(task => {
+        const key = TASK_STATUSES.includes(task.status) ? task.status : 'not_done';
+        counts[key] += 1;
+      });
+      if (statusNotDoneCount) statusNotDoneCount.textContent = counts.not_done;
+      if (statusTriedCount) statusTriedCount.textContent = counts.tried;
+      if (statusPartialCount) statusPartialCount.textContent = counts.partial;
+      if (statusPerfectCount) statusPerfectCount.textContent = counts.perfect;
+      if (todayStatusSub) {
+        todayStatusSub.textContent = todayTasks.length ? `${todayTasks.length}件の集計` : 'まだ集計できるタスクがないよ';
+      }
+
+      const recommended = getRecommendedTask(todayTasks.length ? todayTasks : taskState.tasks.filter(t => !t.isRepeatTemplate));
+      if (nextTaskBox) {
+        nextTaskBox.innerHTML = '';
+        if (!recommended) {
+          nextTaskBox.className = 'task-empty';
+          nextTaskBox.textContent = '今はおすすめがないよ。';
+        } else {
+          nextTaskBox.className = '';
+          const item = renderTaskItem(recommended, { showManualControls: false });
+          nextTaskBox.appendChild(item);
+        }
+      }
+      if (nextTaskHint) {
+        nextTaskHint.textContent = recommended ? '期限と優先度から選んだよ' : '---';
+      }
+    }
+
+    function applyTaskFilters(tasks) {
+      const status = taskState.filters.status;
+      const role = taskState.filters.role;
+      const category = (taskState.filters.category || '').trim();
+      let result = tasks.filter(task => !task.isRepeatTemplate);
+
+      if (status === 'open') {
+        result = result.filter(task => !isTaskDone(task));
+      } else if (status === 'done') {
+        result = result.filter(task => isTaskDone(task));
+      }
+
+      if (role && role !== 'all') {
+        result = result.filter(task => task.role === role);
+      }
+
+      if (category) {
+        result = result.filter(task => (task.category || '').includes(category));
+      }
+
+      return result;
+    }
+
+    function sortTaskListByFilter(tasks) {
+      const sort = taskState.filters.sort;
+      if (sort === 'priority') return sortTasksByPriority(tasks);
+      if (sort === 'manual') return sortTasksByManual(tasks);
+      if (sort === 'created') {
+        return [...tasks].sort((a, b) => {
+          const aTime = new Date(a.createdAt || 0).getTime();
+          const bTime = new Date(b.createdAt || 0).getTime();
+          return aTime - bTime;
+        });
+      }
+      return sortTasksByDue(tasks);
+    }
+
+    function renderTaskListView() {
+      const filtered = applyTaskFilters(taskState.tasks);
+      const sorted = sortTaskListByFilter(filtered);
+      const showManual = taskState.filters.sort === 'manual';
+      renderTaskList(taskList, sorted, { showManualControls: showManual });
+      if (taskListCount) {
+        taskListCount.textContent = sorted.length ? `${sorted.length}件` : 'なし';
+      }
+      if (taskFilterHint) {
+        taskFilterHint.textContent = showManual ? '↑↓ で並び替え' : '---';
+      }
+    }
+
+    function renderTemplatesView() {
+      if (!templateList) return;
+      templateList.innerHTML = '';
+
+      const templates = [...taskState.templates];
+      const order = { weekly: 0, daily: 1, custom: 2 };
+      templates.sort((a, b) => {
+        const ao = order[a.kind] ?? 3;
+        const bo = order[b.kind] ?? 3;
+        if (ao !== bo) return ao - bo;
+        return (a.name || '').localeCompare((b.name || ''), 'ja');
+      });
+
+      if (templateCount) {
+        templateCount.textContent = templates.length ? `${templates.length}件` : 'なし';
+      }
+
+      if (templates.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'task-empty';
+        empty.textContent = 'テンプレはまだないよ。';
+        templateList.appendChild(empty);
+        return;
+      }
+
+      templates.forEach(template => {
+        const card = document.createElement('div');
+        card.className = 'template-card';
+
+        const head = document.createElement('div');
+        head.className = 'template-head';
+
+        const left = document.createElement('div');
+        const title = document.createElement('div');
+        title.className = 'template-title';
+        const kindLabel = template.kind === 'weekly'
+          ? '週テンプレ'
+          : template.kind === 'daily'
+            ? '日テンプレ'
+            : 'テンプレ';
+        title.textContent = `${kindLabel}：${template.name || '(無題)'}`;
+        left.appendChild(title);
+
+        const sub = document.createElement('div');
+        sub.className = 'tasks-card-sub';
+        sub.textContent = template.items.length ? `${template.items.length}件の項目` : '項目なし';
+        left.appendChild(sub);
+
+        head.appendChild(left);
+
+        const actions = document.createElement('div');
+        actions.className = 'template-actions';
+
+        const addItemBtn = document.createElement('button');
+        addItemBtn.className = 'task-btn';
+        addItemBtn.textContent = '＋項目';
+        addItemBtn.setAttribute('data-action', 'add-item');
+        addItemBtn.setAttribute('data-template-id', template.id);
+        actions.appendChild(addItemBtn);
+
+        const generateBtn = document.createElement('button');
+        generateBtn.className = 'task-btn primary';
+        generateBtn.textContent = template.kind === 'weekly' ? '今週に生成' : template.kind === 'daily' ? '今日に生成' : '今日に追加';
+        generateBtn.setAttribute('data-action', 'generate');
+        generateBtn.setAttribute('data-template-id', template.id);
+        actions.appendChild(generateBtn);
+
+        const renameBtn = document.createElement('button');
+        renameBtn.className = 'task-btn';
+        renameBtn.textContent = '名前変更';
+        renameBtn.setAttribute('data-action', 'rename');
+        renameBtn.setAttribute('data-template-id', template.id);
+        actions.appendChild(renameBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'task-btn danger';
+        deleteBtn.textContent = '削除';
+        deleteBtn.setAttribute('data-action', 'delete-template');
+        deleteBtn.setAttribute('data-template-id', template.id);
+        actions.appendChild(deleteBtn);
+
+        head.appendChild(actions);
+
+        card.appendChild(head);
+
+        const itemsWrap = document.createElement('div');
+        itemsWrap.className = 'template-items';
+
+        if (!template.items.length) {
+          const empty = document.createElement('div');
+          empty.className = 'task-empty';
+          empty.textContent = '項目がまだないよ。';
+          itemsWrap.appendChild(empty);
+        } else {
+          template.items.forEach(item => {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'template-item';
+            itemEl.setAttribute('data-template-id', template.id);
+            itemEl.setAttribute('data-item-id', item.id);
+
+            const name = document.createElement('div');
+            name.textContent = item.title || '(無題)';
+            itemEl.appendChild(name);
+
+            const meta = document.createElement('div');
+            meta.className = 'template-item-meta';
+            meta.textContent = `${getRoleLabel(item.role)} / 優先 ${item.priority}`;
+            if (item.category) {
+              const span = document.createElement('span');
+              span.textContent = `種類 ${item.category}`;
+              meta.appendChild(span);
+            }
+            if (Number.isFinite(item.dueOffsetDays)) {
+              const span = document.createElement('span');
+              span.textContent = `期限 +${item.dueOffsetDays}日`;
+              meta.appendChild(span);
+            }
+            itemEl.appendChild(meta);
+
+            const itemActions = document.createElement('div');
+            itemActions.className = 'template-actions';
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'task-btn';
+            editBtn.textContent = '編集';
+            editBtn.setAttribute('data-action', 'edit-item');
+            editBtn.setAttribute('data-template-id', template.id);
+            editBtn.setAttribute('data-item-id', item.id);
+            itemActions.appendChild(editBtn);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'task-btn danger';
+            removeBtn.textContent = '削除';
+            removeBtn.setAttribute('data-action', 'delete-item');
+            removeBtn.setAttribute('data-template-id', template.id);
+            removeBtn.setAttribute('data-item-id', item.id);
+            itemActions.appendChild(removeBtn);
+
+            itemEl.appendChild(itemActions);
+            itemsWrap.appendChild(itemEl);
+          });
+        }
+
+        card.appendChild(itemsWrap);
+        templateList.appendChild(card);
+      });
+    }
+
+    function syncGoalForm() {
+      const goalTask = getGoalTask();
+      if (goalTitleInput) goalTitleInput.value = goalTask ? goalTask.title : '';
+      if (goalPrioritySelect) goalPrioritySelect.value = String(goalTask ? goalTask.priority : 3);
+      if (goalDueInput) goalDueInput.value = goalTask ? normalizeDateKey(goalTask.dueAt) : '';
+      if (goalAutoToggle) goalAutoToggle.checked = taskState.goalSettings.autoGenerate !== false;
+      if (goalHint) {
+        const status = taskState.goalSettings.autoGenerate ? '自動生成ON' : '自動生成OFF';
+        goalHint.textContent = goalTask ? status : '目標を入れると動くよ';
+      }
+    }
+
+    function renderTasksUI() {
+      if (tasksSubtitle) {
+        const openCount = taskState.tasks.filter(task => !task.isRepeatTemplate && isTaskOpen(task)).length;
+        tasksSubtitle.textContent = openCount ? `未完了 ${openCount}件` : 'ゆっくりでOKだよ';
+      }
+      renderTasksDashboard();
+      renderTaskListView();
+      renderTemplatesView();
+      syncGoalForm();
+      if (appEl.classList.contains('calendar-mode')) {
+        renderCalendarMonth();
+        renderCalendarDayPanel();
+      }
+    }
+
+    function buildTaskSummaryForChat() {
+      const todayTasks = getTasksForToday().filter(task => !task.isRepeatTemplate);
+      const counts = {
+        not_done: 0,
+        tried: 0,
+        partial: 0,
+        perfect: 0,
+      };
+      todayTasks.forEach(task => {
+        const key = TASK_STATUSES.includes(task.status) ? task.status : 'not_done';
+        counts[key] += 1;
+      });
+
+      const now = new Date();
+      const todayKey = getIsoDateKey(now);
+
+      const dueSoon = taskState.tasks.filter(task => {
+        if (task.isRepeatTemplate) return false;
+        if (isTaskDone(task)) return false;
+        const dueKey = getTaskDateKey(task);
+        if (!dueKey) return false;
+        const diff = diffDays(todayKey, dueKey);
+        return diff <= 3;
+      });
+
+      const highPriority = taskState.tasks.filter(task => {
+        if (task.isRepeatTemplate) return false;
+        if (isTaskDone(task)) return false;
+        return task.priority >= 4;
+      });
+
+      const recommended = getRecommendedTask(taskState.tasks.filter(task => !task.isRepeatTemplate));
+
+      const lines = [];
+      lines.push('今日のタスク状況だよ。');
+      lines.push(
+        `- できなかった ${counts.not_done} / やろうとした ${counts.tried} / 途中まで ${counts.partial} / 完璧 ${counts.perfect}`
+      );
+      if (dueSoon.length) {
+        const list = sortTasksByDue(dueSoon).slice(0, 3).map(task => {
+          const due = formatTaskDueLabel(task);
+          return `${task.title}${due ? `（${due}）` : ''}`;
+        });
+        lines.push(`- 期限が近い: ${list.join('、')}`);
+      } else {
+        lines.push('- 期限が近いタスク: 今はなし');
+      }
+      if (highPriority.length) {
+        const list = sortTasksByPriority(highPriority).slice(0, 3).map(task => task.title);
+        lines.push(`- 優先度高め: ${list.join('、')}`);
+      } else {
+        lines.push('- 優先度高め: 今はなし');
+      }
+      if (recommended) {
+        lines.push(`- 次にやるなら: ${recommended.title}`);
+      }
+      return lines.join('\n');
+    }
+
+    function detectTaskQuery(text) {
+      const t = String(text || '').trim();
+      if (!t) return false;
+      const keywords = [
+        '今日の状況',
+        '今日のタスク',
+        'タスク状況',
+        '期限近い',
+        '締切近い',
+        '優先度高い',
+      ];
+      return keywords.some(keyword => t.includes(keyword));
+    }
+
+    let taskSheetState = {
+      mode: 'task',
+      taskId: null,
+      templateId: null,
+      itemId: null,
+    };
+
+    function openTaskSheetForTask(task, overrides = {}) {
+      if (!taskSheet) return;
+      taskSheetState = {
+        mode: 'task',
+        taskId: task ? task.id : null,
+        templateId: null,
+        itemId: null,
+      };
+
+      if (taskSheetTitle) taskSheetTitle.textContent = task ? 'タスクを編集' : 'タスクを追加';
+      if (taskSheetSub) taskSheetSub.textContent = overrides.sub || '必要なところだけ編集してね';
+
+      if (taskSheetTitleInput) taskSheetTitleInput.value = task ? task.title : (overrides.title || '');
+      if (taskSheetPriority) taskSheetPriority.value = String(task ? task.priority : (overrides.priority || 3));
+      if (taskSheetDue) taskSheetDue.value = task ? normalizeDateKey(task.dueAt) : (overrides.dueAt || '');
+      if (taskSheetCategory) taskSheetCategory.value = task ? (task.category || '') : (overrides.category || '');
+      if (taskSheetRole) taskSheetRole.value = task ? (task.role || 'normal') : (overrides.role || 'normal');
+      if (taskSheetStatus) taskSheetStatus.value = task ? task.status : 'not_done';
+
+      if (taskSheetStatusField) taskSheetStatusField.style.display = 'block';
+      if (taskSheetRepeatField) taskSheetRepeatField.style.display = 'block';
+
+      const repeatValue = task && task.repeat
+        ? (task.repeat.byweekday && task.repeat.byweekday.length === 5 ? 'weekdays' : task.repeat.freq)
+        : (overrides.repeat || '');
+      if (taskSheetRepeat) taskSheetRepeat.value = repeatValue || '';
+
+      const shouldShowTemplateToggle = !!(task && (task.instanceOfTemplateId || task.isRepeatTemplate));
+      if (taskSheetTemplateToggleField) {
+        taskSheetTemplateToggleField.style.display = shouldShowTemplateToggle ? 'block' : 'none';
+      }
+      if (taskSheetApplyTemplate && shouldShowTemplateToggle) {
+        taskSheetApplyTemplate.value = 'template';
+      }
+
+      taskSheet.classList.add('open');
+    }
+
+    function openTaskSheetForTemplateItem(template, item) {
+      if (!taskSheet || !template) return;
+      taskSheetState = {
+        mode: 'template-item',
+        taskId: null,
+        templateId: template.id,
+        itemId: item ? item.id : null,
+      };
+
+      if (taskSheetTitle) taskSheetTitle.textContent = item ? 'テンプレ項目を編集' : 'テンプレ項目を追加';
+      if (taskSheetSub) taskSheetSub.textContent = template.name ? `テンプレ: ${template.name}` : 'テンプレ項目を追加';
+
+      if (taskSheetTitleInput) taskSheetTitleInput.value = item ? item.title : '';
+      if (taskSheetPriority) taskSheetPriority.value = String(item ? item.priority : 3);
+      if (taskSheetCategory) taskSheetCategory.value = item ? (item.category || '') : '';
+      if (taskSheetRole) taskSheetRole.value = item ? (item.role || 'normal') : (template.kind === 'weekly' ? 'weekly' : template.kind === 'daily' ? 'daily' : 'normal');
+
+      const baseDate = parseDateKey(template.baseDate) || new Date();
+      const dueDate = item && Number.isFinite(item.dueOffsetDays)
+        ? getIsoDateKey(addDays(baseDate, item.dueOffsetDays))
+        : '';
+      if (taskSheetDue) taskSheetDue.value = dueDate;
+
+      if (taskSheetStatusField) taskSheetStatusField.style.display = 'none';
+      if (taskSheetRepeatField) taskSheetRepeatField.style.display = 'none';
+      if (taskSheetTemplateToggleField) taskSheetTemplateToggleField.style.display = 'none';
+
+      taskSheet.classList.add('open');
+    }
+
+    function closeTaskSheet() {
+      if (!taskSheet) return;
+      taskSheet.classList.remove('open');
+    }
+
+    function saveTemplateItemFromSheet() {
+      const template = getTemplateById(taskSheetState.templateId);
+      if (!template) return false;
+
+      const title = (taskSheetTitleInput?.value || '').trim();
+      if (!title) {
+        alert('タイトルを入れてね');
+        return false;
+      }
+
+      const priority = clampPriority(taskSheetPriority?.value);
+      const category = (taskSheetCategory?.value || '').trim();
+      const role = normalizeRole(taskSheetRole?.value || 'normal');
+      const dueKey = normalizeDateKey(taskSheetDue?.value || '');
+      const baseDate = template.baseDate || getIsoDateKey(new Date());
+      const dueOffsetDays = dueKey ? diffDays(baseDate, dueKey) : null;
+
+      if (taskSheetState.itemId) {
+        const idx = template.items.findIndex(item => item.id === taskSheetState.itemId);
+        if (idx !== -1) {
+          template.items[idx] = {
+            ...template.items[idx],
+            title,
+            priority,
+            category,
+            role,
+            dueOffsetDays,
+            updatedAt: new Date().toISOString(),
+          };
+        }
+      } else {
+        template.items.push({
+          id: createId('tpl_item'),
+          title,
+          priority,
+          category,
+          role,
+          dueOffsetDays,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+
+      template.updatedAt = new Date().toISOString();
+      updateTemplate(template);
+      return true;
+    }
+
+    function saveTaskFromSheet() {
+      const title = (taskSheetTitleInput?.value || '').trim();
+      if (!title) {
+        alert('タイトルを入れてね');
+        return false;
+      }
+
+      const data = {
+        title,
+        priority: clampPriority(taskSheetPriority?.value),
+        dueAt: normalizeDateKey(taskSheetDue?.value || ''),
+        category: (taskSheetCategory?.value || '').trim(),
+        role: normalizeRole(taskSheetRole?.value || 'normal'),
+        status: normalizeStatus(taskSheetStatus?.value || 'not_done'),
+        repeat: normalizeRepeatWithDefaults(taskSheetRepeat?.value || '', taskSheetDue?.value || ''),
+      };
+
+      if (!taskSheetState.taskId) {
+        if (data.repeat) {
+          createRepeatSeed(data);
+        } else {
+          const task = createTaskFromData(data);
+          taskState.tasks.push(task);
+          saveTasks();
+          if (task.role === 'goal') {
+            taskState.goalSettings.goalTaskId = task.id;
+            saveGoalSettings();
+            ensureGoalTemplates();
+            ensureGoalRepeats();
+          }
+        }
+        return true;
+      }
+
+      const task = getTaskById(taskSheetState.taskId);
+      if (!task) return false;
+
+      const applyTarget = taskSheetApplyTemplate ? taskSheetApplyTemplate.value : 'instance';
+
+      if (applyTarget === 'template' && task.instanceOfTemplateId) {
+        const template = getTemplateById(task.instanceOfTemplateId);
+        if (template && task.templateItemId) {
+          const idx = template.items.findIndex(item => item.id === task.templateItemId);
+          if (idx !== -1) {
+            const dueOffsetDays = data.dueAt ? diffDays(template.baseDate, data.dueAt) : null;
+            template.items[idx] = {
+              ...template.items[idx],
+              title: data.title,
+              priority: data.priority,
+              category: data.category,
+              role: data.role,
+              dueOffsetDays,
+              updatedAt: new Date().toISOString(),
+            };
+            template.updatedAt = new Date().toISOString();
+            updateTemplate(template);
+          }
+        } else {
+          const seed = getTaskById(task.instanceOfTemplateId);
+          if (seed && seed.isRepeatTemplate) {
+            seed.title = data.title;
+            seed.priority = data.priority;
+            seed.category = data.category;
+            seed.role = data.role;
+            seed.repeat = data.repeat || seed.repeat;
+            seed.updatedAt = new Date().toISOString();
+            upsertTask(seed);
+          }
+        }
+      }
+
+      if (!task.isRepeatTemplate && !task.instanceOfTemplateId && data.repeat) {
+        taskState.tasks = taskState.tasks.filter(t => t.id !== task.id);
+        const seedId = createId('repeat');
+        const seed = createTaskFromData({
+          ...data,
+          repeat: data.repeat,
+          templateId: seedId,
+          isRepeatTemplate: true,
+          status: 'not_done',
+        });
+        seed.id = seedId;
+        const instance = createTaskFromData({
+          ...data,
+          repeat: null,
+          instanceOfTemplateId: seedId,
+          generatedFor: data.dueAt || getIsoDateKey(new Date()),
+        });
+        instance.id = task.id;
+        taskState.tasks.push(seed, instance);
+        saveTasks();
+        return true;
+      }
+
+      task.title = data.title;
+      task.priority = data.priority;
+      task.category = data.category;
+      task.role = data.role;
+      task.dueAt = data.dueAt;
+      task.status = data.status;
+      if (task.isRepeatTemplate) {
+        task.repeat = data.repeat || task.repeat;
+      }
+      task.updatedAt = new Date().toISOString();
+      upsertTask(task);
+
+      if (task.role === 'goal') {
+        taskState.goalSettings.goalTaskId = task.id;
+        saveGoalSettings();
+        ensureGoalTemplates();
+        ensureGoalRepeats();
+      } else if (taskState.goalSettings.goalTaskId === task.id) {
+        taskState.goalSettings.goalTaskId = null;
+        saveGoalSettings();
+      }
+      return true;
+    }
+
+    function handleTaskSheetSave() {
+      const ok = taskSheetState.mode === 'template-item'
+        ? saveTemplateItemFromSheet()
+        : saveTaskFromSheet();
+      if (!ok) return;
+      renderTasksUI();
+      closeTaskSheet();
+    }
+
+    function handleQuickTaskAdd() {
+      const title = (quickTaskTitle?.value || '').trim();
+      if (!title) {
+        alert('タイトルを入れてね');
+        return;
+      }
+      const data = {
+        title,
+        priority: clampPriority(quickTaskPriority?.value || 3),
+        dueAt: normalizeDateKey(quickTaskDue?.value || ''),
+        category: (quickTaskCategory?.value || '').trim(),
+        role: normalizeRole(quickTaskRole?.value || 'normal'),
+        status: 'not_done',
+        repeat: null,
+      };
+      const task = createTaskFromData(data);
+      taskState.tasks.push(task);
+      saveTasks();
+      if (task.role === 'goal') {
+        taskState.goalSettings.goalTaskId = task.id;
+        saveGoalSettings();
+        ensureGoalTemplates();
+        ensureGoalRepeats();
+      }
+      if (quickTaskTitle) quickTaskTitle.value = '';
+      if (quickTaskDue) quickTaskDue.value = '';
+      if (quickTaskCategory) quickTaskCategory.value = '';
+      if (quickTaskRole) quickTaskRole.value = 'normal';
+      renderTasksUI();
+    }
+
+    function handleGoalSave() {
+      const title = (goalTitleInput?.value || '').trim();
+      if (!title) {
+        alert('目標を入力してね');
+        return;
+      }
+
+      const dueAt = normalizeDateKey(goalDueInput?.value || '');
+      const priority = clampPriority(goalPrioritySelect?.value || 3);
+      const goalTask = getGoalTask();
+      if (goalTask) {
+        goalTask.title = title;
+        goalTask.priority = priority;
+        goalTask.dueAt = dueAt;
+        goalTask.role = 'goal';
+        goalTask.updatedAt = new Date().toISOString();
+        upsertTask(goalTask);
+      } else {
+        const task = createTaskFromData({
+          title,
+          priority,
+          dueAt,
+          category: 'goal',
+          role: 'goal',
+          status: 'not_done',
+        });
+        taskState.tasks.push(task);
+        taskState.goalSettings.goalTaskId = task.id;
+        saveTasks();
+      }
+
+      taskState.goalSettings.autoGenerate = goalAutoToggle ? goalAutoToggle.checked : true;
+      saveGoalSettings();
+      ensureGoalTemplates();
+      ensureGoalRepeats();
+      renderTasksUI();
+    }
+
+    function handleGoalClear() {
+      const goalTask = getGoalTask();
+      if (!goalTask) return;
+      const ok = window.confirm('最終目標を解除する？');
+      if (!ok) return;
+
+      deleteTaskById(goalTask.id);
+      taskState.goalSettings.goalTaskId = null;
+
+      if (taskState.goalSettings.weeklyTemplateId || taskState.goalSettings.dailyTemplateId) {
+        const removeTemplates = window.confirm('目標用の週/日テンプレも削除する？');
+        if (removeTemplates) {
+          if (taskState.goalSettings.weeklyTemplateId) {
+            removeTemplate(taskState.goalSettings.weeklyTemplateId);
+          }
+          if (taskState.goalSettings.dailyTemplateId) {
+            removeTemplate(taskState.goalSettings.dailyTemplateId);
+          }
+          taskState.goalSettings.weeklyTemplateId = null;
+          taskState.goalSettings.dailyTemplateId = null;
+          taskState.goalSettings.lastWeeklyGenerated = null;
+          taskState.goalSettings.lastDailyGenerated = null;
+        }
+      }
+
+      saveGoalSettings();
+      renderTasksUI();
+    }
+
+    function handleTaskListClick(event) {
+      const actionBtn = event.target.closest('[data-action]');
+      if (!actionBtn) return;
+      const action = actionBtn.getAttribute('data-action');
+      const row = event.target.closest('[data-task-id]');
+      if (!row) return;
+      const taskId = row.getAttribute('data-task-id');
+      const task = getTaskById(taskId);
+      if (!task) return;
+
+      if (action === 'status') {
+        const status = actionBtn.getAttribute('data-status');
+        updateTaskStatus(taskId, status);
+        renderTasksUI();
+        return;
+      }
+
+      if (action === 'edit') {
+        openTaskSheetForTask(task);
+        return;
+      }
+
+      if (action === 'delete') {
+        const ok = window.confirm('このタスクを削除する？');
+        if (!ok) return;
+        if (task.role === 'goal' && taskState.goalSettings.goalTaskId === task.id) {
+          taskState.goalSettings.goalTaskId = null;
+          saveGoalSettings();
+        }
+        deleteTaskById(task.id);
+        renderTasksUI();
+        return;
+      }
+
+      if (action === 'move-up') {
+        moveTaskManual(task.id, 'up');
+        renderTasksUI();
+        return;
+      }
+
+      if (action === 'move-down') {
+        moveTaskManual(task.id, 'down');
+        renderTasksUI();
+      }
+    }
+
+    function handleTemplateListClick(event) {
+      const actionBtn = event.target.closest('[data-action]');
+      if (!actionBtn) return;
+      const action = actionBtn.getAttribute('data-action');
+      const templateId = actionBtn.getAttribute('data-template-id');
+      const itemId = actionBtn.getAttribute('data-item-id');
+
+      if (action === 'add-item' && templateId) {
+        const template = getTemplateById(templateId);
+        openTaskSheetForTemplateItem(template, null);
+        return;
+      }
+      if (action === 'edit-item' && templateId && itemId) {
+        const template = getTemplateById(templateId);
+        if (!template) return;
+        const item = template.items.find(i => i.id === itemId);
+        openTaskSheetForTemplateItem(template, item);
+        return;
+      }
+      if (action === 'delete-item' && templateId && itemId) {
+        const template = getTemplateById(templateId);
+        if (!template) return;
+        const ok = window.confirm('このテンプレ項目を削除する？');
+        if (!ok) return;
+        template.items = template.items.filter(i => i.id !== itemId);
+        template.updatedAt = new Date().toISOString();
+        updateTemplate(template);
+        renderTasksUI();
+        return;
+      }
+      if (action === 'generate' && templateId) {
+        generateTasksFromTemplate(templateId, new Date());
+        renderTasksUI();
+        return;
+      }
+      if (action === 'rename' && templateId) {
+        const template = getTemplateById(templateId);
+        if (!template) return;
+        const nextName = window.prompt('テンプレ名を変更', template.name || '');
+        if (!nextName) return;
+        template.name = nextName.trim();
+        template.updatedAt = new Date().toISOString();
+        updateTemplate(template);
+        renderTasksUI();
+        return;
+      }
+      if (action === 'delete-template' && templateId) {
+        const ok = window.confirm('このテンプレを削除する？');
+        if (!ok) return;
+        removeTemplate(templateId);
+        if (taskState.goalSettings.weeklyTemplateId === templateId) {
+          taskState.goalSettings.weeklyTemplateId = null;
+        }
+        if (taskState.goalSettings.dailyTemplateId === templateId) {
+          taskState.goalSettings.dailyTemplateId = null;
+        }
+        saveGoalSettings();
+        renderTasksUI();
+      }
+    }
     // 画面状態
     const calendarState = {
       year: new Date().getFullYear(),
@@ -3341,6 +5828,7 @@ const MAX_IMAGE_MB = 8;
     function openCalendarView() {
       appEl.classList.remove('profile-mode');
       appEl.classList.remove('diary-mode');
+      appEl.classList.remove('tasks-mode');
       appEl.classList.add('calendar-mode');
 
       // 今日ピル
@@ -3394,6 +5882,7 @@ const MAX_IMAGE_MB = 8;
 
         const isoKey = getIsoDateKey(cellDate);
         const events = getEventsForDate(isoKey);
+        const tasks = getTasksDueOn(isoKey);
         const diary = getDiaryEntryForDate(isoKey);
         const chatCount = getChatCountForDate(isoKey);
 
@@ -3429,7 +5918,13 @@ const MAX_IMAGE_MB = 8;
           const t = document.createElement('span');
           t.textContent = `${events.length}`;
           left.appendChild(t);
-        } else {
+        }
+        if (tasks.length > 0) {
+          const t = document.createElement('span');
+          t.textContent = `📋 ${tasks.length}`;
+          left.appendChild(t);
+        }
+        if (events.length === 0 && tasks.length === 0) {
           left.textContent = '';
         }
 
@@ -3483,12 +5978,14 @@ const MAX_IMAGE_MB = 8;
       if (calPanelTitle) calPanelTitle.textContent = formatDateLabelJa(date);
 
       const events = sortEvents(getEventsForDate(isoKey));
+      const tasks = sortTasksByPriority(getTasksDueOn(isoKey));
       const diary = getDiaryEntryForDate(isoKey);
       const chatCount = getChatCountForDate(isoKey);
 
       if (calPanelSub) {
         const parts = [];
         parts.push(events.length ? `予定 ${events.length}件` : '予定なし');
+        parts.push(tasks.length ? `タスク ${tasks.length}件` : 'タスクなし');
         parts.push(diary && (diary.line || '').trim() ? '日記あり' : '日記なし');
         parts.push(chatCount ? `会話 ${chatCount}` : '会話なし');
         calPanelSub.textContent = parts.join(' / ');
@@ -3572,6 +6069,34 @@ const MAX_IMAGE_MB = 8;
             wrap.appendChild(top);
             calEventsList.appendChild(wrap);
           }
+        }
+      }
+
+      // tasks list
+      if (calTasksList) {
+        calTasksList.innerHTML = '';
+        if (tasks.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'cal-empty';
+          empty.textContent = 'タスクはまだないよ。';
+          calTasksList.appendChild(empty);
+        } else {
+          tasks.forEach(task => {
+            const wrap = document.createElement('div');
+            wrap.className = 'cal-task';
+
+            const title = document.createElement('div');
+            title.className = 'cal-task-title';
+            title.textContent = task.title || '(無題)';
+
+            const meta = document.createElement('div');
+            meta.className = 'cal-task-meta';
+            meta.textContent = `${getRoleLabel(task.role)} / 優先 ${task.priority} / ${TASK_STATUS_LABELS[task.status] || '未設定'}`;
+
+            wrap.appendChild(title);
+            wrap.appendChild(meta);
+            calTasksList.appendChild(wrap);
+          });
         }
       }
 
@@ -3850,6 +6375,7 @@ const MAX_IMAGE_MB = 8;
 
     function openDiaryView() {
       appEl.classList.remove('profile-mode');
+      appEl.classList.remove('tasks-mode');
       appEl.classList.add('diary-mode');
       loadTodayIntoDiaryForm();
     }
@@ -3926,6 +6452,81 @@ const MAX_IMAGE_MB = 8;
         generateDiaryReaction(moodEmoji, line, detail);
       });
     }
+
+    // ---- Tasksイベント ----
+    if (tasksCloseBtn) {
+      tasksCloseBtn.addEventListener('click', () => closeTasksView(true));
+    }
+    if (tasksSubnav) {
+      tasksSubnav.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tasks-tab');
+        if (!btn) return;
+        const panelId = btn.getAttribute('data-tasks-tab');
+        if (!panelId) return;
+        setTasksPanel(panelId);
+      });
+    }
+    if (quickTaskAddBtn) quickTaskAddBtn.addEventListener('click', handleQuickTaskAdd);
+    if (quickTaskOpenBtn) {
+      quickTaskOpenBtn.addEventListener('click', () => {
+        openTaskSheetForTask(null, {
+          title: (quickTaskTitle?.value || '').trim(),
+          priority: clampPriority(quickTaskPriority?.value || 3),
+          dueAt: normalizeDateKey(quickTaskDue?.value || ''),
+          category: (quickTaskCategory?.value || '').trim(),
+          role: normalizeRole(quickTaskRole?.value || 'normal'),
+        });
+      });
+    }
+    if (goalSaveBtn) goalSaveBtn.addEventListener('click', handleGoalSave);
+    if (goalClearBtn) goalClearBtn.addEventListener('click', handleGoalClear);
+
+    if (taskStatusFilter) {
+      taskStatusFilter.addEventListener('change', () => {
+        taskState.filters.status = taskStatusFilter.value;
+        renderTaskListView();
+      });
+    }
+    if (taskRoleFilter) {
+      taskRoleFilter.addEventListener('change', () => {
+        taskState.filters.role = taskRoleFilter.value;
+        renderTaskListView();
+      });
+    }
+    if (taskCategoryFilter) {
+      taskCategoryFilter.addEventListener('input', () => {
+        taskState.filters.category = taskCategoryFilter.value;
+        renderTaskListView();
+      });
+    }
+    if (taskSortSelect) {
+      taskSortSelect.addEventListener('change', () => {
+        taskState.filters.sort = taskSortSelect.value;
+        renderTaskListView();
+      });
+    }
+
+    if (taskList) taskList.addEventListener('click', handleTaskListClick);
+    if (todayTasksList) todayTasksList.addEventListener('click', handleTaskListClick);
+    if (nextTaskBox) nextTaskBox.addEventListener('click', handleTaskListClick);
+
+    if (templateList) templateList.addEventListener('click', handleTemplateListClick);
+    if (createTemplateBtn) {
+      createTemplateBtn.addEventListener('click', () => {
+        const name = (templateNameInput?.value || '').trim();
+        if (!name) {
+          alert('テンプレ名を入れてね');
+          return;
+        }
+        createTemplate(name, 'custom');
+        if (templateNameInput) templateNameInput.value = '';
+        renderTasksUI();
+      });
+    }
+
+    if (taskSheetCloseBtn) taskSheetCloseBtn.addEventListener('click', closeTaskSheet);
+    if (taskSheetCancelBtn) taskSheetCancelBtn.addEventListener('click', closeTaskSheet);
+    if (taskSheetSaveBtn) taskSheetSaveBtn.addEventListener('click', handleTaskSheetSave);
 
     function formatDateTime(date) {
       const y = date.getFullYear();
@@ -4367,6 +6968,24 @@ const MAX_IMAGE_MB = 8;
       updateInputMood("");
       resizeInput();
 
+      if (!pendingImageBase64 && detectTaskQuery(text)) {
+        const replyText = buildTaskSummaryForChat();
+        const botNow = new Date();
+        const botTimestamp = botNow.toISOString();
+        const botNode = addMessage('bot', replyText, { timestamp: botTimestamp });
+        lastBotMessageNode = botNode;
+
+        conversation.push({
+          role: 'assistant',
+          text: replyText,
+          imageBase64: null,
+          timestamp: botTimestamp,
+        });
+        saveConversationToStorage();
+        pendingImageBase64 = null;
+        return;
+      }
+
       // ===== 返信中UI表示開始 =====
       // inflightToken を生成（複数送信対策）
       const currentToken = Symbol('inflight');
@@ -4618,6 +7237,7 @@ const MAX_IMAGE_MB = 8;
         profileSaveBtn.style.cursor = 'not-allowed';
 
         appEl.classList.remove('diary-mode');
+        appEl.classList.remove('tasks-mode');
         appEl.classList.remove('calendar-mode');
         appEl.classList.add('profile-mode');
 
@@ -4829,6 +7449,7 @@ const MAX_IMAGE_MB = 8;
 
     // ===== 起動時 =====
     window.addEventListener('load', () => {
+      initializeTasks();
       enabledTabs = loadEnabledTabs();
       if (!enabledTabs.includes(activeTabId)) {
         activeTabId = enabledTabs[0];
@@ -4836,6 +7457,12 @@ const MAX_IMAGE_MB = 8;
       renderTopNav();
       selectTab(activeTabId);
       updateDropdownChecks();
+
+      if (taskStatusFilter) taskStatusFilter.value = taskState.filters.status;
+      if (taskRoleFilter) taskRoleFilter.value = taskState.filters.role;
+      if (taskCategoryFilter) taskCategoryFilter.value = taskState.filters.category;
+      if (taskSortSelect) taskSortSelect.value = taskState.filters.sort;
+      renderTasksUI();
 
       applyTimeTheme();
       updateStatusBar();
@@ -5065,6 +7692,7 @@ function renderOnboardingStep() {
     const calPanelSub = document.getElementById('calPanelSub');
     const calAddBtn = document.getElementById('calAddBtn');
     const calEventsList = document.getElementById('calEventsList');
+    const calTasksList = document.getElementById('calTasksList');
     const calDiaryBox = document.getElementById('calDiaryBox');
     const calChatBox = document.getElementById('calChatBox');
 
