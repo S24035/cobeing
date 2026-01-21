@@ -1,73 +1,48 @@
-﻿# CoBeing タスク機能（Tasks v1）
+# CoBeing タスク機能（Daily v2）
 
 ## 概要
-- Dashboard / Tasks / Templates / Calendar を追加し、タスク・目標を同一モデルで運用できるようにしました。
-- 4段階達成（できなかった / やろうとした / 途中まで / 完璧）をワンタップで更新できます。
-- テンプレからの一括生成、毎日/毎週/平日の繰り返し、目標の自動生成（初回のみ）に対応しています。
-- チャットの「今日の状況どう？」「期限近いのある？」「優先度高いの何？」にローカル集計で回答します。
+- タスク画面に Daily / Goal 切替を追加（Goal は Coming Soon の案内のみ）。
+- Daily 内は「一覧 / タスク作成 / 達成状況分析」の3タブ構成。
+- 期限は dueAt（ISO datetime）で保持し、一覧は残り時間表示。
+- 報告ボタン → 4段階（できなかった / やろうとした / 途中まで / 完璧）選択で更新。
+- テンプレ作成と一括追加に対応。
+- チャットの「今日の状況どう？」「期限近いのある？」「優先度高いの何？」にローカル集計で回答。
 
 ## データ構造
 ### Task
 - id: string
 - title: string
 - priority: 1..5
-- dueAt?: ISO date string（YYYY-MM-DD）
+- dueAt?: ISO datetime string（YYYY-MM-DDTHH:mm）
 - category: string
-- role: "normal" | "daily" | "weekly" | "goal"
 - status: "not_done" | "tried" | "partial" | "perfect"
-- repeat?: { freq: "daily"|"weekly", interval?: number, byweekday?: number[] }
-- templateId?: string
-- instanceOfTemplateId?: string
-- templateItemId?: string
-- generatedFor?: string
+- statusUpdatedAt?: ISO string
 - createdAt: ISO
 - updatedAt: ISO
 
 ### Template
 - id: string
 - name: string
-- kind: "custom" | "daily" | "weekly"
-- baseDate: YYYY-MM-DD
-- items: TaskDraft[]
-- createdAt: ISO
-- updatedAt: ISO
-
-TaskDraft
-- id: string
-- title: string
-- priority: 1..5
-- category: string
-- role: "normal" | "daily" | "weekly" | "goal"
-- dueOffsetDays?: number
-- createdAt: ISO
-- updatedAt: ISO
-
-### GoalSettings
-- autoGenerate: boolean
-- goalTaskId?: string
-- weeklyTemplateId?: string
-- dailyTemplateId?: string
-- lastWeeklyGenerated?: string
-- lastDailyGenerated?: string
+- items: { title: string, priority: number, dueAt?: ISO datetime, category: string }[]
 
 ## ストレージ
-- `cobeing_tasks_v1`（schemaVersion: 1）
-- `cobeing_templates_v1`（schemaVersion: 1）
-- `cobeing_goal_settings_v1`（schemaVersion: 1）
+- `cobeing_tasks_v1`（schemaVersion: 2）
+- `cobeing_templates_v1`（schemaVersion: 2）
+- 旧 `YYYY-MM-DD` 形式の dueAt は読み込み時に `23:59` を付与して互換保持。
 
 ## 手動テスト（チェックリスト）
-- [ ] Dashboard でクイック追加（タイトル/優先度/期限/種類）ができる
-- [ ] タスクの編集/削除ができ、リロード後も残る
-- [ ] 4段階ステータスが更新でき、集計に反映される
-- [ ] テンプレを作成し、一括生成ができる
-- [ ] 繰り返し（毎日/毎週/平日）を設定し、翌日に自動生成される
-- [ ] 目標を保存すると初回のみ週/日テンプレが自動生成される（ON時）
-- [ ] 週/日テンプレを編集すると次回生成に反映される
-- [ ] カレンダー（月表示）で期限タスクの印が表示される
-- [ ] チャットで「今日の状況どう？」にタスク集計が返る
+- [ ] タスク画面に Daily / Goal 切替が表示され、Goal は案内のみで壊れない
+- [ ] Daily のタブが「一覧 / タスク作成 / 達成状況分析」になっている
+- [ ] クイック追加でタイトル/優先度/期限/カテゴリが保存され、リロード後も残る
+- [ ] 一覧に「タイトル / 残り時間 / 優先度 / 報告ボタン」だけ表示される
+- [ ] 報告ボタン → 4段階選択で即時反映され、Undo が動く
+- [ ] テンプレ作成 → 項目追加 → 今日に一括追加ができる
+- [ ] 達成状況分析で今日の4段階件数とカテゴリ内訳が表示される
+- [ ] カレンダー（月表示）に期限タスク件数が表示される
+- [ ] チャットで「今日の状況どう？」に集計回答が返る
 
 ## 既知の制約と今後の拡張
-- テンプレの期限は baseDate を基準としたオフセットで管理（UIは日付入力）。
-- 自動生成はアプリ起動時 or タスク画面を開いた時に実行（バックグラウンド更新は未対応）。
+- Goal モードは UI 枠のみ（自動生成ロジックは未実装）。
+- テンプレの期限は時刻中心（適用時に今日の日付へ変換）。
+- 達成状況分析は「dueAt が今日のタスク」を対象。
 - iOS標準カレンダー連携は未対応（アプリ内カレンダーのみ）。
-- テンプレ/繰り返しの履歴表示や詳細分析は今後の拡張候補。
