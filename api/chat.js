@@ -148,34 +148,72 @@ function buildTimeMoodText(timeInfo = {}) {
 }
 
 // =====================================
-//  今日の予定（system 用コンテキスト）
+//  近日の予定（system 用コンテキスト）
 // =====================================
-function buildTodayEventsText(todayEvents) {
-  const list = Array.isArray(todayEvents) ? todayEvents : [];
-  const safe = (s, max = 80) => String(s ?? '').replace(/\s+/g, ' ').slice(0, max);
+function resolveEventRangeDays(rangeDays, events) {
+  const n = Number(rangeDays);
+  if (Number.isFinite(n) && n > 0) return Math.min(14, n);
+  const hasDate = Array.isArray(events) && events.some((e) => e && e.date);
+  return hasDate ? 3 : 1;
+}
 
-  const lines = ['【今日の予定（カレンダー参照ONのみ）】'];
+function formatEventDateLabel(dateKey) {
+  if (!dateKey) return '';
+  const str = String(dateKey);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str);
+  if (!match) return str.slice(0, 10);
+  return `${match[2]}/${match[3]}`;
+}
+
+function buildUpcomingEventsText(upcomingEvents, rangeDays) {
+  const list = Array.isArray(upcomingEvents) ? upcomingEvents : [];
+  const safe = (s, max = 80) => String(s ?? '').replace(/\s+/g, ' ').slice(0, max);
+  const dayCount = resolveEventRangeDays(rangeDays, list);
+  const maxItems = Math.max(1, Math.min(24, dayCount * 4));
+
+  const header =
+    dayCount > 1
+      ? `【近日の予定（チャット参照ON / 今日〜${dayCount - 1}日先）】`
+      : '【今日の予定（チャット参照ON）】';
+  const lines = [header];
 
   if (list.length === 0) {
-    lines.push('- 今日はカレンダー参照ONの予定が登録されていません。');
+    lines.push(
+      dayCount > 1
+        ? '- 近日の予定は登録されていません。'
+        : '- 今日の予定は登録されていません。',
+    );
     return lines.join('\n') + '\n';
   }
 
-  // 最大8件に制限（フロントも8件だが念のため）
-  for (const e of list.slice(0, 8)) {
-    const title = safe(e.title || '（無題）', 60);
-    const start = safe(e.start || '', 10);
-    const end = safe(e.end || '', 10);
-    const note = safe(e.note || '', 120);
+  let currentGroup = '';
+  for (const e of list.slice(0, maxItems)) {
+    const dateKey = safe(e.date || '', 16);
+    const dateLabel = safe(e.dateLabel || '', 24);
+    const relativeLabel = safe(e.relativeLabel || '', 8);
+    const weekdayLabel = safe(e.weekdayLabel || '', 8);
+    const dateText = dateLabel || formatEventDateLabel(dateKey) || '日付未設定';
+    const groupKey = dateKey || dateLabel || relativeLabel || weekdayLabel || 'unknown';
+    if (groupKey !== currentGroup) {
+      const hints = [relativeLabel, weekdayLabel].filter(Boolean).join('・');
+      const hintText = hints ? `（${hints}）` : '';
+      lines.push(`- ${dateText}${hintText}`);
+      currentGroup = groupKey;
+    }
 
-    const time = (start || end) ? `${start || '??:??'}〜${end || '??:??'}` : '時間未設定';
-    lines.push(`- ${time}：${title}${note ? `（メモ: ${note}）` : ''}`);
+    const title = safe(e.title || '（無題）', 60);
+    const startTime = safe(e.start || '', 10);
+    const endTime = safe(e.end || '', 10);
+    const note = safe(e.note || '', 120);
+    const time = (startTime || endTime) ? `${startTime || '--:--'}-${endTime || '--:--'}` : '時間未設定';
+    let line = `  - ${time} ${title}`;
+    if (note) line += `（メモ: ${note}）`;
+    lines.push(line);
   }
 
   return lines.join('\n') + '\n';
 }
 
-// ===== 日記コンテキスト整形（system prompt 用）=====
 function trimDiaryEntryForPrompt(entry, maxLen = 420) {
   if (!entry || typeof entry !== 'object') return null;
   const line = String(entry.line || '').replace(/\s+/g, ' ').trim();
@@ -413,6 +451,8 @@ module.exports = async function handler(req, res) {
       timeInfo,
       profile: profileBody,
       userProfile,
+      upcomingEvents,
+      eventsRangeDays,
       todayEvents,
       todayDiary,
       yesterdayDiary,
@@ -425,14 +465,16 @@ module.exports = async function handler(req, res) {
     const personaText = buildPersonaText(effectivePersona);
     const timeMoodText = buildTimeMoodText(timeInfo);
     const profileText = buildProfileText(profile || {});
-    const todayEventsText = buildTodayEventsText(todayEvents);
+    const mergedEvents =
+      Array.isArray(upcomingEvents) && upcomingEvents.length ? upcomingEvents : todayEvents;
+    const upcomingEventsText = buildUpcomingEventsText(mergedEvents, eventsRangeDays);
     const diaryContextText = buildDiaryContextForSystem(todayDiary, yesterdayDiary);
     const nameUser = resolveUserDisplayName(userName, profile);
 
     let systemPrompt =
       `${personaText}\n\n` +
       `${timeMoodText}\n`;
-    systemPrompt += `${todayEventsText}\n`;
+    systemPrompt += `${upcomingEventsText}\n`;
     systemPrompt += `${diaryContextText}\n`;
 
     systemPrompt +=
@@ -447,9 +489,10 @@ module.exports = async function handler(req, res) {
     systemPrompt +=
       '【会話のルール】\n' +
       `- 話し相手は「${nameUser}」。あなたは「${nameAI}」。\n` +
-      '- 今日の予定（チャット参照ON）がある場合、会話の中で生活や時間を無視しないように返答してください。\n' +
-      '- 上の【今日の予定】は「カレンダーから参照した事実」です。予定がある/ないの判断はこれに基づいてください。\n' +
-      '- 予定が1件以上ある場合、返答の中で必ず一度は予定に触れてください（軽くでOK）。\n' +
+      '- 近日の予定（チャット参照ON）がある場合、会話の中で生活や時間を無視しないように返答してください。\n' +
+      '- 上の【近日の予定】は「カレンダーから参照した事実」です。予定がある/ないの判断はこれに基づいてください。\n' +
+      '- 質問に「今日/明日/明後日/曜日/日付」が含まれる場合は、該当日の予定だけ答えてください。該当日の予定が見当たらなければ「その日の予定は入っていない」と伝え、推測しないでください。\n' +
+      '- 予定が1件以上ある場合、返答の中で必ず一度は予定に触れてください（軽くでOK。日付指定なら該当日のみ）。\n' +
       '- プロフィール情報は、このアプリ内での会話をしやすくするためだけに使ってください。\n' +
       '- ユーザーから「俺のことわかる？」「名前覚えてる？」「ニックネームわかる？」と聞かれたら、プロフィールやこれまでの会話の範囲で覚えていることを、やさしく具体的に伝えてください。\n' +
       '- プロフィールにニックネームがあれば、その名前で自然に呼びかけてください。なければ、「どう呼んだらうれしいか」をたずねてください。\n' +
@@ -473,7 +516,7 @@ module.exports = async function handler(req, res) {
     console.log('[CoBeing] profile type =', isProfileStoreLike(profile) ? 'ProfileStore' : 'legacy/v1 or none');
     console.log('[CoBeing] profile.user.nickname =', profile?.user?.nickname || profile?.nickname || '(none)');
     console.log('[CoBeing] messages length =', messages.length);
-    console.log('[CoBeing] todayEvents count =', Array.isArray(todayEvents) ? todayEvents.length : 0);
+    console.log('[CoBeing] upcomingEvents count =', Array.isArray(mergedEvents) ? mergedEvents.length : 0);
     console.log(
       '[CoBeing] todayDiary present =',
       !!todayDiary,

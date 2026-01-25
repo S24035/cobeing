@@ -1913,9 +1913,10 @@ position: absolute;
       inset:0;
       background: rgba(15,23,42,0.55);
       display:none;
-      align-items:flex-end;
+      align-items:flex-start;
       justify-content:center;
       padding:14px;
+      padding-top: calc(14px + env(safe-area-inset-top));
       z-index:900;
     }
     .cal-sheet.open{ display:flex; }
@@ -3286,7 +3287,10 @@ const PROFILE_KEY_V2 = 'cobeing_profile_v2';
       'cobeing_first_date',         // Day N 用の初回日付
       'cobeing_persona_preset_v1',  // AIのモード（PERSONA_KEY の中身を直書き）
       'cobeing_diary_v1',           // ✅ 日記（Diary v0）
+      'cobeing_tasks_v1',           // ✅ タスク
+      'cobeing_templates_v1',       // ✅ テンプレ
       'cobeing_task_history_v1',    // ✅ タスク履歴
+      'cobeing_calendar_v1',        // ✅ カレンダー
 
     ];
 
@@ -3302,6 +3306,7 @@ const PROFILE_KEY_V2 = 'cobeing_profile_v2';
         '・タブ設定\n' +
         '・日記\n' +
         '・タスク / テンプレ\n' +
+        '・カレンダー\n' +
         '・相棒のモード などが消えます。\n\n' +
         '本当に続行してもいい？'
       );
@@ -4138,18 +4143,124 @@ const MAX_IMAGE_MB = 8;
       return n;
     }
 
-    // 今日の予定（チャット参照用）
-    function getTodayEventsForChat() {
-      const todayKey = getIsoDateKey(new Date());
-      const list = getEventsForDate(todayKey).filter(e => e && e.reflectToChat);
-      const sorted = sortEvents(list);
-      // 文字量が増えすぎないように最大8件
-      return sorted.slice(0, 8).map(e => ({
+    // 近日の予定（チャット参照用）
+    const CHAT_EVENTS_RANGE_DAYS = 2; // 今日 + 明日
+    const CHAT_EVENTS_MAX_ITEMS = 12;
+    const CHAT_WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
+
+    function formatChatDateLabel(date) {
+      const mo = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const w = CHAT_WEEKDAYS[date.getDay()];
+      return `${mo}/${d}(${w})`;
+    }
+
+    function isChatEventVisible(e) {
+      return e && e.reflectToChat !== false;
+    }
+
+    function detectRequestedDayOffset(text) {
+      const t = String(text || '').trim();
+      if (!t) return null;
+      const hasToday = t.includes('今日') || t.includes('本日');
+      const hasTomorrow = t.includes('明日');
+      if (hasToday && hasTomorrow) return null;
+      if (t.includes('明後日')) return 2;
+      if (hasTomorrow) return 1;
+      if (hasToday) return 0;
+
+      const weekdayPatterns = [
+        { day: 0, re: /(日曜|日曜日)/ },
+        { day: 1, re: /(月曜|月曜日)/ },
+        { day: 2, re: /(火曜|火曜日)/ },
+        { day: 3, re: /(水曜|水曜日)/ },
+        { day: 4, re: /(木曜|木曜日)/ },
+        { day: 5, re: /(金曜|金曜日)/ },
+        { day: 6, re: /(土曜|土曜日)/ },
+      ];
+
+      const today = new Date();
+      const todayDow = today.getDay();
+      for (const item of weekdayPatterns) {
+        if (!item.re.test(t)) continue;
+        const diff = (item.day - todayDow + 7) % 7;
+        if (diff <= 2) return diff;
+        return null;
+      }
+
+      return null;
+    }
+
+    function getEventsForChatOnDate(date, dayOffset = 0, maxItems = CHAT_EVENTS_MAX_ITEMS) {
+      const key = getIsoDateKey(date);
+      const dayEvents = sortEvents(getEventsForDate(key)).filter(isChatEventVisible);
+      const dateLabel = formatChatDateLabel(date);
+      const weekdayLabel = `${CHAT_WEEKDAYS[date.getDay()]}曜日`;
+      const relativeLabel = (dayOffset === 0) ? '今日' : (dayOffset === 1) ? '明日' : (dayOffset === 2) ? '明後日' : '';
+      return dayEvents.slice(0, maxItems).map(e => ({
+        date: key,
+        dateLabel,
+        relativeLabel,
+        weekdayLabel,
+        dayOffset,
         title: e.title || '',
         start: e.start || '',
         end: e.end || '',
         note: e.note || ''
       }));
+    }
+
+    function getUpcomingEventsForChat(days = CHAT_EVENTS_RANGE_DAYS, maxItems = CHAT_EVENTS_MAX_ITEMS) {
+      const base = new Date();
+      const result = [];
+      const totalDays = Math.max(1, Math.min(14, Number(days) || CHAT_EVENTS_RANGE_DAYS));
+      for (let i = 0; i < totalDays; i += 1) {
+        const d = new Date(base);
+        d.setDate(base.getDate() + i);
+        const key = getIsoDateKey(d);
+        const dayEvents = sortEvents(getEventsForDate(key)).filter(isChatEventVisible);
+        const relativeLabel = (i === 0) ? '今日' : (i === 1) ? '明日' : (i === 2) ? '明後日' : '';
+        const dateLabel = formatChatDateLabel(d);
+        const weekdayLabel = `${CHAT_WEEKDAYS[d.getDay()]}曜日`;
+        for (const e of dayEvents) {
+          result.push({
+            date: key,
+            dateLabel,
+            relativeLabel,
+            weekdayLabel,
+            dayOffset: i,
+            title: e.title || '',
+            start: e.start || '',
+            end: e.end || '',
+            note: e.note || ''
+          });
+          if (result.length >= maxItems) return result;
+        }
+      }
+      return result;
+    }
+
+    function getTodayEventsForChat() {
+      const today = new Date();
+      // 文字量が増えすぎないように最大8件
+      return getEventsForChatOnDate(today, 0, 8);
+    }
+
+    function buildChatEventsContextForMessage(text) {
+      const offset = detectRequestedDayOffset(text);
+      if (offset !== null) {
+        const target = new Date();
+        target.setDate(target.getDate() + offset);
+        return {
+          events: getEventsForChatOnDate(target, offset, CHAT_EVENTS_MAX_ITEMS),
+          rangeDays: (offset === 0) ? 1 : Math.max(CHAT_EVENTS_RANGE_DAYS, offset + 1),
+        };
+      }
+
+      return {
+        events: getUpcomingEventsForChat(CHAT_EVENTS_RANGE_DAYS, CHAT_EVENTS_MAX_ITEMS),
+        rangeDays: CHAT_EVENTS_RANGE_DAYS,
+      };
     }
 
     // 今日/昨日の日記（チャット参照用）
@@ -5159,12 +5270,15 @@ const calendarState = {
           '短く、温かく、次の対話を促すようにしてください。'
         );
 
+        const chatEventsContext = buildChatEventsContextForMessage('');
         const payload = {
           aiName: getAiDisplayName(),
           userName: getUserDisplayName(),
           personaPreset: profileStore?.ai?.personaPreset || currentPersonaId || 'gentle',
           conversation: conversation.slice(-10),
           timeInfo,
+          upcomingEvents: chatEventsContext.events,
+          eventsRangeDays: chatEventsContext.rangeDays,
           todayEvents: getTodayEventsForChat(),
           userProfile: profileStore,
         };
@@ -5384,6 +5498,7 @@ const calendarState = {
 
       const timeInfo = buildTimeInfoForAPI();
       const profileStore = loadProfileStore();
+      const chatEventsContext = buildChatEventsContextForMessage(text);
 
       const payload = {
         aiName: getAiDisplayName(),
@@ -5391,6 +5506,8 @@ const calendarState = {
         personaPreset: profileStore?.ai?.personaPreset || currentPersonaId || 'gentle',
         conversation: conversation,   // ✅ messages じゃなく conversation
         timeInfo,
+        upcomingEvents: chatEventsContext.events,
+        eventsRangeDays: chatEventsContext.rangeDays,
         todayEvents: getTodayEventsForChat(),
         todayDiary: getTodayDiaryForChat(),
         yesterdayDiary: getYesterdayDiaryForChat(),
@@ -5771,6 +5888,7 @@ const calendarState = {
         if (!(String(profileStore.user.nickname || '').trim()) || !(String(profileStore.ai.name || '').trim())) return;
 
         const timeInfo = buildTimeInfoForAPI();
+        const chatEventsContext = buildChatEventsContextForMessage('');
 
         const payload = {
           aiName: getAiDisplayName(),
@@ -5778,6 +5896,8 @@ const calendarState = {
           personaPreset: profileStore?.ai?.personaPreset || currentPersonaId || 'gentle',
           conversation: [], // 初回は空
           timeInfo,
+          upcomingEvents: chatEventsContext.events,
+          eventsRangeDays: chatEventsContext.rangeDays,
           todayEvents: getTodayEventsForChat(),
           todayDiary: getTodayDiaryForChat(),
           yesterdayDiary: getYesterdayDiaryForChat(),
