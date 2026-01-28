@@ -22,6 +22,12 @@
     4: "高め",
     5: "最重要",
   };
+  const ANALYSIS_RANGE_LABELS = {
+    day: "今日",
+    week: "1週間",
+    month: "1か月",
+    year: "1年",
+  };
 
   const dom = {};
   const dueScopes = {};
@@ -33,6 +39,7 @@
   const uiState = {
     mode: "daily",
     tab: "list",
+    analysisRange: "day",
     reportTaskId: null,
     reportPrevStatus: null,
     reportPrevStatusUpdatedAt: null,
@@ -120,6 +127,9 @@
     dom.analysisTriedCount = document.getElementById("analysisTriedCount");
     dom.analysisPartialCount = document.getElementById("analysisPartialCount");
     dom.analysisPerfectCount = document.getElementById("analysisPerfectCount");
+    dom.analysisRangeButtons = document.getElementById("analysisRangeButtons");
+    dom.analysisRangeTitle = document.getElementById("analysisRangeTitle");
+    dom.analysisCategorySub = document.getElementById("analysisCategorySub");
     dom.analysisCategoryList = document.getElementById("analysisCategoryList");
     dom.analysisTopList = document.getElementById("analysisTopList");
 
@@ -222,6 +232,15 @@
       });
     }
 
+    if (dom.analysisRangeButtons) {
+      dom.analysisRangeButtons.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-range]");
+        if (!btn) return;
+        const range = btn.getAttribute("data-range");
+        setAnalysisRange(range);
+      });
+    }
+
     if (dom.quickTaskAddBtn) {
       dom.quickTaskAddBtn.addEventListener("click", () => handleQuickAdd(false));
     }
@@ -316,6 +335,20 @@
         btn.classList.toggle("active", btn.getAttribute("data-tasks-tab") === tab);
       });
     }
+  }
+
+  function setAnalysisRange(range) {
+    if (!range) return;
+    uiState.analysisRange = range;
+    updateAnalysisRangeButtons();
+    renderAnalysis();
+  }
+
+  function updateAnalysisRangeButtons() {
+    if (!dom.analysisRangeButtons) return;
+    dom.analysisRangeButtons.querySelectorAll(".analysis-range-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-range") === uiState.analysisRange);
+    });
   }
 
   function renderHeader() {
@@ -531,10 +564,18 @@
   }
 
   function renderAnalysis() {
-    const summary = TaskDomain.getTodayAnalysis();
+    const rangeKey = uiState.analysisRange || "day";
+    const summary = TaskDomain.getAnalysisForRange
+      ? TaskDomain.getAnalysisForRange(rangeKey)
+      : TaskDomain.getTodayAnalysis();
+    const label = ANALYSIS_RANGE_LABELS[rangeKey] || "今日";
+
+    updateAnalysisRangeButtons();
+    if (dom.analysisRangeTitle) dom.analysisRangeTitle.textContent = `${label}の達成状況`;
+    if (dom.analysisCategorySub) dom.analysisCategorySub.textContent = `${label}の傾向`;
 
     if (dom.analysisTotalCount) {
-      dom.analysisTotalCount.textContent = summary.total ? `今日 ${summary.total}件` : "今日はまだなし";
+      dom.analysisTotalCount.textContent = summary.total ? `${label} ${summary.total}件` : `${label}はまだなし`;
     }
     if (dom.analysisNotDoneCount) dom.analysisNotDoneCount.textContent = summary.counts.not_done;
     if (dom.analysisTriedCount) dom.analysisTriedCount.textContent = summary.counts.tried;
@@ -546,7 +587,7 @@
       if (!summary.categories.length) {
         const empty = document.createElement("div");
         empty.className = "task-empty";
-        empty.textContent = "カテゴリ集計はまだないよ。";
+        empty.textContent = `${label}のカテゴリ集計はまだないよ。`;
         dom.analysisCategoryList.appendChild(empty);
       } else {
         summary.categories.forEach((cat) => {
@@ -570,7 +611,7 @@
       if (!summary.topIncomplete.length) {
         const empty = document.createElement("div");
         empty.className = "task-empty";
-        empty.textContent = "未達が多いカテゴリはまだないよ。";
+        empty.textContent = `${label}の未達が多いカテゴリはまだないよ。`;
         dom.analysisTopList.appendChild(empty);
       } else {
         summary.topIncomplete.forEach((cat) => {

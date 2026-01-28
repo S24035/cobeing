@@ -1466,6 +1466,26 @@ position: absolute;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap:8px;
     }
+    .analysis-range{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .analysis-range-btn{
+      border:1px solid #e5e7eb;
+      background:#ffffff;
+      color:#111827;
+      border-radius:999px;
+      padding:4px 10px;
+      font-size:12px;
+      cursor:pointer;
+    }
+    .analysis-range-btn.active{
+      border-color:#6366f1;
+      background:#eef2ff;
+      box-shadow:0 0 0 1px rgba(129,140,248,0.35);
+    }
     .analysis-card{
       border:1px solid #e5e7eb;
       border-radius:12px;
@@ -2597,9 +2617,15 @@ position: absolute;
         </div>
 
         <div class="tasks-panel" data-tasks-panel="analysis">
+          <div class="analysis-range" id="analysisRangeButtons">
+            <button class="analysis-range-btn active" data-range="day" type="button">今日</button>
+            <button class="analysis-range-btn" data-range="week" type="button">1週間</button>
+            <button class="analysis-range-btn" data-range="month" type="button">1か月</button>
+            <button class="analysis-range-btn" data-range="year" type="button">1年</button>
+          </div>
           <div class="tasks-card">
             <div class="tasks-card-title">
-              <span>今日の達成状況</span>
+              <span id="analysisRangeTitle">今日の達成状況</span>
               <span class="tasks-card-sub" id="analysisTotalCount">---</span>
             </div>
             <div class="analysis-grid">
@@ -2625,7 +2651,7 @@ position: absolute;
           <div class="tasks-card">
             <div class="tasks-card-title">
               <span>カテゴリ別の達成状況</span>
-              <span class="tasks-card-sub">今日の傾向</span>
+              <span class="tasks-card-sub" id="analysisCategorySub">今日の傾向</span>
             </div>
             <div class="analysis-list" id="analysisCategoryList"></div>
             <div class="tasks-card-title" style="margin-top:10px;">

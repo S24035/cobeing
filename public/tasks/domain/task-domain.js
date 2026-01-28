@@ -509,18 +509,37 @@
     return sortTasksByDue(openTasks)[0] || null;
   }
 
-  function getTodayAnalysis() {
-    const todayKey = formatDateKey(new Date());
-    const dueTasks = getTasksForDateKey(todayKey);
-    const reportedTasks = getTasksReportedForDateKey(todayKey);
+  const ANALYSIS_RANGE_DAYS = {
+    day: 1,
+    week: 7,
+    month: 30,
+    year: 365,
+  };
+
+  function buildDateKeysForRange(rangeKey, now = new Date()) {
+    const days = ANALYSIS_RANGE_DAYS[rangeKey] || 1;
+    const keys = [];
+    for (let i = 0; i < days; i += 1) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      keys.push(formatDateKey(d));
+    }
+    return keys;
+  }
+
+  function buildAnalysisForDateKeys(dateKeys) {
     const taskMap = new Map();
-    dueTasks.forEach((task) => taskMap.set(task.id, task));
-    reportedTasks.forEach((task) => taskMap.set(task.id, task));
-    const todayTasks = Array.from(taskMap.values());
-    const counts = countByStatus(todayTasks);
+    (dateKeys || []).forEach((key) => {
+      const dueTasks = getTasksForDateKey(key);
+      const reportedTasks = getTasksReportedForDateKey(key);
+      dueTasks.forEach((task) => taskMap.set(task.id, task));
+      reportedTasks.forEach((task) => taskMap.set(task.id, task));
+    });
+    const rangeTasks = Array.from(taskMap.values());
+    const counts = countByStatus(rangeTasks);
     const categories = {};
 
-    todayTasks.forEach((task) => {
+    rangeTasks.forEach((task) => {
       const name = task.category || "未分類";
       if (!categories[name]) {
         categories[name] = {
@@ -545,11 +564,21 @@
       .slice(0, 3);
 
     return {
-      total: todayTasks.length,
+      total: rangeTasks.length,
       counts,
       categories: list,
       topIncomplete,
     };
+  }
+
+  function getAnalysisForRange(rangeKey) {
+    const key = rangeKey || "day";
+    const dateKeys = buildDateKeysForRange(key);
+    return buildAnalysisForDateKeys(dateKeys);
+  }
+
+  function getTodayAnalysis() {
+    return getAnalysisForRange("day");
   }
 
   function shouldHandleChat(text) {
@@ -824,6 +853,7 @@
     getTasksForDateKey,
     getRemainingInfo,
     getRecommendedTask,
+    getAnalysisForRange,
     getTodayAnalysis,
     shouldHandleChat,
     buildChatSummary,
