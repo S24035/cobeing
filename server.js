@@ -8,8 +8,23 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 const OpenAI = require('openai');
+const { createClient } = require('@supabase/supabase-js');
 
 const APP_KEY = process.env.COBEING_APP_KEY || '';
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+const supabaseAnon = SUPABASE_URL && SUPABASE_ANON_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+  : null;
+const supabaseAdmin = SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+  : null;
 
 function getRequestAppKey(req) {
   const auth = req?.headers?.authorization || req?.headers?.Authorization;
@@ -28,6 +43,50 @@ function isAuthorized(req) {
   if (!APP_KEY) return true;
   const provided = getRequestAppKey(req);
   return provided && provided === APP_KEY;
+}
+
+function getAccessToken(req) {
+  const auth = req?.headers?.authorization || req?.headers?.Authorization || '';
+  const trimmed = String(auth).trim();
+  const match = /^Bearer\s+(.+)$/i.exec(trimmed);
+  if (match) return match[1].trim();
+  return trimmed || '';
+}
+
+function createUserClient(accessToken) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  });
+}
+
+async function requireUser(req, res) {
+  if (!supabaseAnon) {
+    res.status(503).json({ error: 'Supabase not configured' });
+    return null;
+  }
+  const token = getAccessToken(req);
+  if (!token) {
+    res.status(401).json({ error: 'Missing access token' });
+    return null;
+  }
+  const { data, error } = await supabaseAnon.auth.getUser(token);
+  if (error || !data?.user) {
+    res.status(401).json({ error: 'Invalid session' });
+    return null;
+  }
+  const user = data.user;
+  const client = createUserClient(token);
+  if (!client) {
+    res.status(503).json({ error: 'Supabase client missing' });
+    return null;
+  }
+  return { user, token, client };
 }
 
 const app = express();
@@ -544,6 +603,182 @@ app.post('/api/boot', async (req, res) => {
     }
 
     return res.status(500).json({ reply: message });
+  }
+});
+
+
+// =====================================
+//  /api/me エンドポイント（プロフィール + サブスク）
+// =====================================
+app.get('/api/me', async (req, res) => {
+  try {
+    const auth = await requireUser(req, res);
+    if (!auth) return;
+    const { user, client } = auth;
+
+    const { data: profile, error: profileErr } = await client
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (profileErr) throw profileErr;
+
+    if (!profile) {
+      const { data: created, error: insertErr } = await client
+        .from('profiles')
+        .insert({ id: user.id, nickname: '', ai_name: '', persona: '' })
+        .select('*')
+        .single();
+      if (insertErr) throw insertErr;
+      return res.json({ profile: created, subscription: null });
+    }
+
+    const { data: subscription } = await client
+      .from('subscription_status')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    return res.json({ profile, subscription: subscription || null });
+  } catch (err) {
+    console.error('[/api/me] error:', err);
+    return res.status(500).json({ error: 'Failed to load profile' });
+  }
+});
+
+app.post('/api/me', async (req, res) => {
+  try {
+    const auth = await requireUser(req, res);
+    if (!auth) return;
+    const { user, client } = auth;
+    const { nickname, ai_name, persona } = req.body || {};
+
+    const payload = {
+      id: user.id,
+      nickname: nickname ?? null,
+      ai_name: ai_name ?? null,
+      persona: persona ?? null,
+    };
+
+    const { data, error } = await client
+      .from('profiles')
+      .upsert(payload, { onConflict: 'id' })
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    return res.json({ profile: data });
+  } catch (err) {
+    console.error('[/api/me] error:', err);
+    return res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+// =====================================
+//  /api/sync エンドポイント（差分同期）
+// =====================================
+const SYNC_TABLES = {
+  tasks: { withDeleted: true, userField: 'user_id' },
+  task_templates: { withDeleted: true, userField: 'user_id' },
+  diary_entries: { withDeleted: true, userField: 'user_id' },
+  calendar_events: { withDeleted: true, userField: 'user_id' },
+  chat_messages: { withDeleted: true, userField: 'user_id' },
+  profiles: { withDeleted: false, userField: 'id' },
+  subscription_status: { withDeleted: false, userField: 'user_id' },
+  usage_counters: { withDeleted: false, userField: 'user_id' },
+};
+
+function normalizeSince(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '1970-01-01T00:00:00Z';
+  return raw;
+}
+
+app.get('/api/sync', async (req, res) => {
+  try {
+    const auth = await requireUser(req, res);
+    if (!auth) return;
+    const { client } = auth;
+    const since = normalizeSince(req.query.since);
+    const serverTime = new Date().toISOString();
+
+    const result = {};
+    for (const [table, config] of Object.entries(SYNC_TABLES)) {
+      let query = client.from(table).select('*');
+      if (config.withDeleted) {
+        query = query.or(`updated_at.gt.${since},deleted_at.gt.${since}`);
+      } else {
+        query = query.gt('updated_at', since);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      result[table] = data || [];
+    }
+
+    return res.json({
+      server_time: serverTime,
+      since,
+      next_since: serverTime,
+      ...result,
+    });
+  } catch (err) {
+    console.error('[/api/sync GET] error:', err);
+    return res.status(500).json({ error: 'Sync failed' });
+  }
+});
+
+app.post('/api/sync', async (req, res) => {
+  try {
+    const auth = await requireUser(req, res);
+    if (!auth) return;
+    const { user, client } = auth;
+    const items = (req.body && req.body.items) || {};
+    const serverTime = new Date().toISOString();
+
+    const allowedTables = ['tasks', 'task_templates', 'diary_entries', 'calendar_events', 'chat_messages', 'profiles'];
+    for (const table of allowedTables) {
+      const list = Array.isArray(items[table]) ? items[table] : [];
+      if (!list.length) continue;
+
+      const config = SYNC_TABLES[table];
+      const normalized = list.map((item) => {
+        const clone = { ...item };
+        if (config.userField === 'id') {
+          clone.id = user.id;
+        } else if (config.userField) {
+          clone[config.userField] = user.id;
+        }
+        return clone;
+      });
+
+      const { error } = await client.from(table).upsert(normalized, { onConflict: 'id' });
+      if (error) throw error;
+    }
+
+    return res.json({ ok: true, server_time: serverTime });
+  } catch (err) {
+    console.error('[/api/sync POST] error:', err);
+    return res.status(500).json({ error: 'Sync failed' });
+  }
+});
+
+// =====================================
+//  /api/account/delete エンドポイント
+// =====================================
+app.post('/api/account/delete', async (req, res) => {
+  try {
+    const auth = await requireUser(req, res);
+    if (!auth) return;
+    const { user } = auth;
+    if (!supabaseAdmin) {
+      return res.status(503).json({ error: 'Admin key not configured' });
+    }
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+    if (error) throw error;
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('[/api/account/delete] error:', err);
+    return res.status(500).json({ error: 'Delete failed' });
   }
 });
 
