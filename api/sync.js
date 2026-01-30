@@ -52,12 +52,17 @@ async function requireUser(req, res) {
     return null;
   }
   const token = getAccessToken(req);
+  if (token) {
+    console.log('[api/sync][auth] token len=', token.length, 'head=', token.slice(0, 10));
+  }
+  console.log('[api/sync][auth] supabase url set=', Boolean(SUPABASE_URL));
   if (!token) {
     res.status(401).json({ error: 'Missing access token' });
     return null;
   }
   const { data, error } = await supabaseAnon.auth.getUser(token);
   if (error || !data?.user) {
+    console.log('[api/sync][auth] getUser error=', error?.message || 'unknown');
     res.status(401).json({ error: 'Invalid session' });
     return null;
   }
