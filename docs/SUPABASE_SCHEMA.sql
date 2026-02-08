@@ -120,11 +120,17 @@ create table if not exists public.chat_messages (
   role text not null,
   content text not null,
   created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
   deleted_at timestamptz
 );
 
 create index if not exists chat_messages_user_id_idx on public.chat_messages(user_id);
 create index if not exists chat_messages_created_at_idx on public.chat_messages(created_at);
+create index if not exists chat_messages_updated_at_idx on public.chat_messages(updated_at);
+
+create trigger set_chat_messages_updated_at
+before update on public.chat_messages
+for each row execute function public.set_updated_at();
 
 -- subscription status
 create table if not exists public.subscription_status (
